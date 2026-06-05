@@ -1,11 +1,11 @@
 <div align="center">
 
-# DVAP — Damn Vulnerable AI Platform
+# DVAP - Damn Vulnerable AI Platform
 
 **Train. Break. Defend. AI Systems.**
 
-An open-source platform for AI security training, red/blue teaming, CTF, benchmarking, and research.  
-Runs 100% locally — no cloud, no paid APIs, no data leaves your machine.
+An open-source platform for AI security training, red/blue teaming, CTF, benchmarking, and research.
+Runs 100% locally. No cloud, no paid APIs, no data leaves your machine.
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)](LICENSE)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?style=flat-square&logo=docker)](docker-compose.yml)
@@ -22,10 +22,10 @@ Runs 100% locally — no cloud, no paid APIs, no data leaves your machine.
 
 ## Demo
 
-<!-- 
+<!--
   HOW TO ADD YOUR VIDEO:
-  1. Go to this README on GitHub.com → click Edit (pencil icon)
-  2. Drag and drop your MP4 file anywhere into the editor
+  1. Go to this README on GitHub.com and click Edit (pencil icon)
+  2. Drag and drop your MP4 file into the editor
   3. GitHub uploads it and gives you a URL like:
      https://user-images.githubusercontent.com/xxxxx/dvap-demo.mp4
   4. Replace the src below with that URL and commit
@@ -42,22 +42,22 @@ Runs 100% locally — no cloud, no paid APIs, no data leaves your machine.
 ## Quick Start
 
 ```bash
-git clone https://github.com/your-org/dvap
-cd dvap
-cp .env.example .env          # edit secrets before first run
+git clone https://github.com/sonuoffsec/DVAP
+cd DVAP
+cp .env.example .env
 docker compose up -d
 ```
 
-Open `http://localhost:8080` once all containers are healthy (30–60 seconds on first run).
+Open `http://localhost:8080` once all containers are healthy. First run takes 30-60 seconds.
 
 ## Development vs Production
 
 ```bash
-# Development (default) — auto-loads docker-compose.override.yml
+# Development (default) - auto-loads docker-compose.override.yml
 # Hot reload for API and frontend, source mounted as volumes
 docker compose up -d
 
-# Production — baked images, no volume mounts, 4 uvicorn workers
+# Production - baked images, no volume mounts, 4 uvicorn workers
 docker compose -f docker-compose.yml up -d
 ```
 
@@ -69,7 +69,7 @@ docker build -t dvap-web:latest --target production ./frontend
 
 ## Running Tests
 
-Tests require a PostgreSQL instance. Set `TEST_DATABASE_URL` or start the stack first:
+Tests require a PostgreSQL instance. Start the stack first:
 
 ```bash
 docker compose up -d postgres
@@ -110,8 +110,8 @@ Each lab runs in an isolated Docker container with its own Ollama-backed LLM end
 
 Two Docker networks keep lab traffic separate from platform infrastructure:
 
-- `dvap-internal` (172.20.0.0/24) — PostgreSQL, Redis, Qdrant, API, frontend, Nginx
-- `dvap-labs` (172.21.0.0/24) — lab containers and Ollama
+- `dvap-internal` (172.20.0.0/24) - PostgreSQL, Redis, Qdrant, API, frontend, Nginx
+- `dvap-labs` (172.21.0.0/24) - lab containers and Ollama
 
 Lab containers can reach Ollama and nothing else on the internal network. They cannot reach PostgreSQL, Redis, or Qdrant.
 
@@ -119,17 +119,17 @@ Lab containers can reach Ollama and nothing else on the internal network. They c
 
 **Known tradeoff:** The API container mounts `/var/run/docker.sock` to spawn and stop lab containers on demand (Docker-out-of-Docker). This grants the API process root-equivalent access to the host Docker daemon.
 
-This is an intentional design decision: DVAP is a local single-user install intended for security research and training, not a multi-tenant service. The tradeoff is accepted because:
+This is an intentional design decision. DVAP is a local single-user install for security research and training, not a multi-tenant service. The tradeoff is accepted because:
 
 - There is no network-accessible admin interface that could trigger arbitrary container operations
 - Lab container resource limits (512 MB RAM, 0.5 CPU) prevent resource exhaustion
 - Lab images are built from controlled Dockerfiles in this repository
 
-**If you are deploying DVAP in a shared or networked environment**, replace the socket mount with a rootless Docker socket or Podman socket (`/run/user/1000/podman/podman.sock`) and restrict API network access accordingly.
+If you are deploying DVAP in a shared or networked environment, replace the socket mount with a rootless Docker socket or Podman socket (`/run/user/1000/podman/podman.sock`) and restrict API network access accordingly.
 
 ### Instance TTL
 
-Lab instances are automatically stopped after 1 hour via Redis TTL keys. Call `POST /api/v1/instances/cleanup` to trigger early reaping of expired instances.
+Lab instances stop automatically after 1 hour via Redis TTL keys. Call `POST /api/v1/instances/cleanup` to trigger early cleanup.
 
 ### Rate Limiting
 
@@ -140,40 +140,39 @@ Flag submissions are rate-limited to 15 attempts per 60-second window per sessio
 See `.env.example` for all variables. Key ones to change before any networked deployment:
 
 ```
-SECRET_KEY=          # used for HMAC signing — must be a strong random value
+SECRET_KEY=          # strong random value for HMAC signing
 POSTGRES_PASSWORD=   # change from the default
 REDIS_PASSWORD=      # change from the default
 ```
 
 ## Upgrading
 
-When a new version is released, one command brings your install up to date:
+One command brings your install up to date:
 
 ```bash
 make upgrade
 ```
 
-This runs `git pull` then rebuilds and restarts all containers. Database schema migrations run **automatically** every time the API container starts — you never need to run them manually.
+This runs `git pull` then rebuilds and restarts all containers. Database migrations run automatically on every API container start.
 
-If you don't have `make`:
+Without `make`:
 ```bash
 git pull
 docker compose up -d --build
 ```
 
-### What gets upgraded automatically
+### What upgrades automatically
 - Backend code and API endpoints
 - Frontend dashboard
 - Database schema (Alembic migrations)
-- Lab definitions (re-seeded on startup if new labs are added)
+- Lab definitions
 
-### What is never touched automatically
-- Your data — findings, research sessions, benchmark results, campaigns
-- Your `.env` file — check the release notes for any new required variables
+### What is never touched
+- Your data (findings, research sessions, benchmark results, campaigns)
+- Your `.env` file
 
-### Checking for new environment variables
+### Check for new environment variables
 
-When upgrading, diff your `.env` against the latest `.env.example`:
 ```bash
 diff .env .env.example
 ```
@@ -186,4 +185,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add labs, run tests, and submi
 
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE) for the full text.
+Apache 2.0 - see [LICENSE](LICENSE) for the full text.
