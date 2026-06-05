@@ -26,6 +26,21 @@ Runs 100% locally. No cloud, no paid APIs, no data leaves your machine.
 
 ---
 
+## Screenshots
+
+<img src="docs/screenshot-dashboard.png" width="100%"/>
+<br/><br/>
+
+<img src="docs/screenshot-labs.png" width="49%"/> <img src="docs/screenshot-ctf.png" width="49%"/>
+<br/><br/>
+
+<img src="docs/screenshot-benchmarks.png" width="49%"/> <img src="docs/screenshot-research.png" width="49%"/>
+<br/><br/>
+
+<img src="docs/screenshot-findings.png" width="100%"/>
+
+---
+
 ## Quick Start
 
 ```bash
