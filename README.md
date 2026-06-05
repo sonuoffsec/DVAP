@@ -22,20 +22,7 @@ Runs 100% locally. No cloud, no paid APIs, no data leaves your machine.
 
 ## Demo
 
-<!--
-  HOW TO ADD YOUR VIDEO:
-  1. Go to this README on GitHub.com and click Edit (pencil icon)
-  2. Drag and drop your MP4 file into the editor
-  3. GitHub uploads it and gives you a URL like:
-     https://user-images.githubusercontent.com/xxxxx/dvap-demo.mp4
-  4. Replace the src below with that URL and commit
--->
-
-<!--
-<video src="https://user-images.githubusercontent.com/YOUR_URL/dvap-demo.mp4" controls width="100%"></video>
--->
-
-> **Demo video coming soon.** Star the repo to get notified.
+<video src="https://github.com/user-attachments/assets/24c84b1c-1eb2-4268-befe-08162f38e89f" controls width="100%"></video>
 
 ---
 
