@@ -16,6 +16,61 @@ Runs 100% locally. No cloud, no paid APIs, no data leaves your machine.
 
 ---
 
+## What is DVAP?
+
+DVAP is an open-source AI security research, training, benchmarking, and red teaming platform designed to help security professionals, AI engineers, researchers, students, and organizations understand how modern AI systems fail — and how to defend them.
+
+Built for the AI era, DVAP provides intentionally vulnerable AI applications, agents, RAG systems, MCP integrations, and domain-specific environments that can be attacked, analyzed, benchmarked, and secured.
+
+Unlike cloud-based AI playgrounds, DVAP runs entirely on your machine.
+
+**No cloud. No subscriptions. No API costs. No vendor lock-in.**
+
+---
+
+## Why DVAP?
+
+Modern AI applications introduce entirely new attack surfaces:
+
+- Prompt Injection
+- Memory Poisoning
+- RAG Poisoning
+- Tool Abuse
+- MCP Exploitation
+- Multi-Agent Attacks
+- Autonomous Agent Manipulation
+- Data Exfiltration
+- Identity & Trust Failures
+- AI Supply Chain Risks
+
+Yet there is no single platform that allows researchers to safely learn, practice, benchmark, and validate these attacks in one place.
+
+DVAP aims to become the definitive open-source platform for AI security education, research, and experimentation.
+
+---
+
+## Key Features
+
+**AI Security Labs**
+15 intentionally vulnerable labs covering real-world AI attack techniques.
+
+**Research Workspace**
+Inspect prompts, memory, tool calls, retrieved documents, agent actions, and attack chains.
+
+**Security Benchmarking**
+Evaluate local and external models against AI security attack suites.
+
+**Capture The Flag (CTF)**
+Learn AI security through guided challenges, flags, hints, and walkthroughs.
+
+**Reporting Engine**
+Generate professional findings and benchmark reports mapped to OWASP LLM Top 10, MITRE ATLAS, CWE, and CVSS.
+
+**100% Local**
+Run everything on your own machine. Your prompts, data, findings, and experiments never leave your environment.
+
+---
+
 ![DVAP Platform Overview](docs/dvap-diagram.png)
 
 ---
