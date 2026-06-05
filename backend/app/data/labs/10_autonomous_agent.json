@@ -1,0 +1,75 @@
+{
+  "slug": "autonomous-agent",
+  "name": "Autonomous Agent Security",
+  "description": "Attack long-running autonomous agents with persistent goals and planning capabilities. Explore goal hijacking, planning manipulation, resource limit bypass, and how self-modifying agents can be redirected to serve attacker objectives.",
+  "category": "autonomous_agent",
+  "difficulty": "expert",
+  "version": "1.0.0",
+  "author": "DVAP Research Team",
+  "sort_order": 10,
+  "objectives": [
+    "Hijack an agent's primary goal through environmental manipulation",
+    "Corrupt an agent's long-horizon plan to insert attacker objectives",
+    "Bypass resource and action rate limits in autonomous operation",
+    "Demonstrate persistent goal corruption across agent restarts",
+    "Exploit self-reflection mechanisms to manipulate agent behavior"
+  ],
+  "tags": ["LLM08", "autonomous-agent", "goal-hijacking", "planning-manipulation", "resource-abuse"],
+  "attack_surface": [
+    "Agent goal store without integrity protection",
+    "Planning module accepting environmental feedback",
+    "Action executor with insufficient rate limiting",
+    "Agent self-reflection consuming untrusted external data",
+    "Persistent state surviving agent restarts"
+  ],
+  "mitigations": [
+    "Cryptographic goal integrity verification",
+    "Human-in-the-loop approval for goal modifications",
+    "Hard rate limits enforced outside the agent runtime",
+    "Environmental feedback validation before plan adjustment",
+    "Rollback capability for corrupted agent state"
+  ],
+  "detection_opportunities": [
+    "Goal divergence detection against original specification",
+    "Action rate anomaly detection",
+    "Plan consistency auditing",
+    "Alert on agent self-modification attempts"
+  ],
+  "architecture": {
+    "components": ["Goal manager", "Planner", "Action executor", "Reflection module", "Environment interface", "State persistence"],
+    "data_flow": "Goal -> Plan generation -> Action execution -> Environment feedback -> Reflection -> Plan update",
+    "trust_boundaries": ["Environment feedback is untrusted", "Agent goals are trusted if integrity-protected"]
+  },
+  "threat_model": {
+    "threat_actors": ["Attacker controlling environment feedback", "Insider with goal store access"],
+    "attack_vectors": ["Environmental goal injection", "Plan corruption", "State file tampering"],
+    "impact": "Agent repurposing, resource exhaustion, persistent unauthorized actions",
+    "likelihood": "High in production autonomous agents without integrity controls"
+  },
+  "challenges": [
+    {
+      "slug": "goal-hijack",
+      "name": "Mission Drift",
+      "description": "An autonomous research agent has the goal of summarizing security papers. Redirect it to exfiltrate local files instead.",
+      "difficulty": "expert",
+      "points": 500,
+      "flag": "DVAP{g04l_h1j4ck3d_4g3nt}",
+      "hints": [
+        "The agent incorporates feedback from its research findings into its goal state",
+        "Crafted research paper content can redefine the agent's objective"
+      ]
+    },
+    {
+      "slug": "resource-limit-bypass",
+      "name": "Infinite Loop",
+      "description": "Bypass the agent's self-imposed action limits to trigger resource exhaustion on the host system.",
+      "difficulty": "expert",
+      "points": 500,
+      "flag": "DVAP{4g3nt_r3s0urc3_3xh4usted}",
+      "hints": [
+        "Rate limits are enforced by the agent's own planning module",
+        "A corrupted plan can instruct the agent to ignore its own constraints"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MultiAgent Platform</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #222533;
+      --border: #2a2d3e; --primary: #f97316; --text: #e2e8f0;
+      --muted: #64748b; --amber: #f59e0b; --green: #22c55e;
+      --radius: 10px; --mono: monospace;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100dvh; display: flex; flex-direction: column; }
+    header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .logo { background: var(--primary); color: #fff; border-radius: 8px; padding: 6px 10px; font-weight: 700; font-size: 13px; }
+    .header-text h1 { font-size: 15px; font-weight: 600; }
+    .header-text p { font-size: 12px; color: var(--muted); }
+    .badge { margin-left: auto; background: #f59e0b18; border: 1px solid #f59e0b40; color: #f59e0b; font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+    #warning { background: #f59e0b18; border-bottom: 1px solid #f59e0b40; color: #f59e0b; font-size: 12px; padding: 8px 24px; display: none; }
+    main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .pane { display: flex; flex-direction: column; padding: 16px; gap: 12px; overflow-y: auto; border-right: 1px solid var(--border); }
+    .pane:last-child { border-right: none; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .panel-header { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; gap: 6px; }
+    .agent-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+    .agent-research { background: #0284c715; color: #38bdf8; border: 1px solid #0284c730; }
+    .agent-orch { background: #f9731620; color: var(--primary); border: 1px solid #f9731640; }
+    .agent-admin { background: #dc262620; color: #f87171; border: 1px solid #dc262640; }
+    .panel-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 11px; color: var(--muted); }
+    textarea.txt { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--text); font-size: 13px; font-family: var(--font); outline: none; resize: vertical; min-height: 80px; width: 100%; transition: border-color .15s; }
+    textarea.txt:focus { border-color: var(--primary); }
+    select { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-size: 13px; outline: none; width: 100%; transition: border-color .15s; }
+    .btn { background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s; }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .response-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 12px; font-family: var(--mono); white-space: pre-wrap; word-break: break-all; min-height: 50px; max-height: 220px; overflow-y: auto; color: var(--text); }
+    .hint { font-size: 11px; color: var(--amber); background: #f59e0b10; border: 1px solid #f59e0b30; border-radius: 6px; padding: 8px 10px; line-height: 1.5; }
+    .msg-log { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 11px; font-family: var(--mono); max-height: 150px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">MA</div>
+    <div class="header-text">
+      <h1>MultiAgent Platform</h1>
+      <p>Orchestrator + Research + Execution Agent Network</p>
+    </div>
+    <div class="badge">Multi-Agent Security Lab</div>
+  </header>
+  <div id="warning">No LLM model available. Go to <strong>Settings</strong> and pull a model (e.g. llama3.2:3b).</div>
+
+  <main>
+    <div class="pane">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="agent-badge agent-research">research_agent</span>
+          Research Sub-Agent
+        </div>
+        <div class="panel-body">
+          <p style="font-size:12px;color:var(--muted)">Submit content for the research agent to summarize. The summary is returned for you to forward to the orchestrator.</p>
+          <label>Content to summarize</label>
+          <textarea class="txt" id="research-content" placeholder="Paste content for the research agent to process..."></textarea>
+          <button class="btn" onclick="runResearch()">Summarize</button>
+          <label>Research Agent Output</label>
+          <div class="response-box" id="research-output"></div>
+          <button class="btn" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="copyToOrch()">Forward to Orchestrator</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Attack Hints</div>
+        <div class="panel-body">
+          <div class="hint">Challenge 1: Craft research content that embeds instructions in the summary output, then forward it to the orchestrator as research_agent. The orchestrator trusts research_agent output as verified data.</div>
+          <div class="hint">Challenge 2: Send a message to the orchestrator with from_agent set to "admin-agent" — the orchestrator grants admin-agent privileged trust without cryptographic verification.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane">
+      <div class="panel">
+        <div class="panel-header">
+          <span class="agent-badge agent-orch">orchestrator</span>
+          Orchestrator Agent
+        </div>
+        <div class="panel-body">
+          <label>From Agent (identity claim)</label>
+          <select id="from-agent">
+            <option value="research_agent">research_agent</option>
+            <option value="execution_agent">execution_agent</option>
+            <option value="admin-agent">admin-agent (privileged)</option>
+            <option value="user">user</option>
+          </select>
+          <label>Message Content</label>
+          <textarea class="txt" id="orch-content" placeholder="Message to send to the orchestrator..."></textarea>
+          <button class="btn" onclick="sendToOrch()">Send to Orchestrator</button>
+          <label>Orchestrator Response</label>
+          <div class="response-box" id="orch-output"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Message Log</div>
+        <div class="panel-body">
+          <div class="msg-log" id="msg-log">No messages yet.</div>
+          <button class="btn" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);font-size:11px" onclick="loadLog()">Refresh</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    async function checkModel() {
+      try {
+        const r = await fetch('/api/model');
+        const d = await r.json();
+        if (!d.available) document.getElementById('warning').style.display = 'block';
+      } catch {}
+    }
+
+    async function runResearch() {
+      const content = document.getElementById('research-content').value.trim();
+      if (!content) return;
+      const el = document.getElementById('research-output');
+      el.textContent = 'Processing...';
+      try {
+        const r = await fetch('/api/research-agent/summarize', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({content}),
+        });
+        const d = await r.json();
+        el.textContent = d.summary;
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    function copyToOrch() {
+      const summary = document.getElementById('research-output').textContent;
+      document.getElementById('orch-content').value = summary;
+      document.getElementById('from-agent').value = 'research_agent';
+    }
+
+    async function sendToOrch() {
+      const fromAgent = document.getElementById('from-agent').value;
+      const content = document.getElementById('orch-content').value.trim();
+      if (!content) return;
+      const el = document.getElementById('orch-output');
+      el.textContent = 'Processing...';
+      try {
+        const r = await fetch('/api/orchestrator/message', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({from_agent: fromAgent, content}),
+        });
+        const d = await r.json();
+        el.textContent = d.orchestrator_response;
+        loadLog();
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    async function loadLog() {
+      try {
+        const r = await fetch('/api/message-log');
+        const d = await r.json();
+        const el = document.getElementById('msg-log');
+        if (!d.length) { el.textContent = 'No messages yet.'; return; }
+        el.textContent = d.map(m => `[${m.from}] ${m.content}`).join('\n---\n');
+      } catch {}
+    }
+
+    checkModel();
+    loadLog();
+  </script>
+</body>
+</html>

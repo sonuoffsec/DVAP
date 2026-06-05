@@ -1,0 +1,75 @@
+{
+  "slug": "mcp-security",
+  "name": "MCP Server Security",
+  "description": "Attack and defend Model Context Protocol servers. Explore server-side request forgery through MCP tool parameters, malicious resource handlers, prompt injection via MCP responses, and privilege escalation through tool chaining.",
+  "category": "mcp_security",
+  "difficulty": "advanced",
+  "version": "1.0.0",
+  "author": "DVAP Research Team",
+  "sort_order": 5,
+  "objectives": [
+    "Enumerate available MCP tools and resources without authorization",
+    "Exploit SSRF through MCP tool URI parameters",
+    "Inject instructions via MCP resource content",
+    "Abuse MCP sampling requests to exfiltrate data",
+    "Chain MCP tool calls for lateral movement"
+  ],
+  "tags": ["MCP", "SSRF", "tool-abuse", "protocol-security", "agent-security"],
+  "attack_surface": [
+    "MCP tool input parameters accepting arbitrary URIs",
+    "Resource handlers serving untrusted content",
+    "MCP server running with excessive filesystem permissions",
+    "Sampling endpoint exposed without authentication",
+    "Tool descriptions that can be manipulated by the server"
+  ],
+  "mitigations": [
+    "URI allowlisting in MCP tool parameters",
+    "Filesystem access sandboxing for MCP servers",
+    "Authentication and authorization for MCP endpoints",
+    "Content scanning on resource responses",
+    "Tool description integrity verification"
+  ],
+  "detection_opportunities": [
+    "Monitor MCP tool calls for SSRF patterns in URIs",
+    "Alert on filesystem access outside expected paths",
+    "Log all sampling requests with source attribution",
+    "Detect anomalous tool call sequences"
+  ],
+  "architecture": {
+    "components": ["MCP client (LLM host)", "MCP server", "Resource handlers", "Tool registry", "Sampling endpoint"],
+    "data_flow": "Client request -> MCP server -> Resource/Tool execution -> Response -> Client context",
+    "trust_boundaries": ["MCP server is semi-trusted", "Resource content is untrusted", "Tool parameters from LLM are partially trusted"]
+  },
+  "threat_model": {
+    "threat_actors": ["Malicious MCP server operator", "Attacker controlling tool inputs via prompt injection"],
+    "attack_vectors": ["SSRF via tool URI parameters", "Resource content injection", "Sampling abuse"],
+    "impact": "Internal network access, data exfiltration, agent compromise",
+    "likelihood": "High in enterprise agentic deployments"
+  },
+  "challenges": [
+    {
+      "slug": "mcp-ssrf",
+      "name": "Server Reach",
+      "description": "Use a vulnerable MCP file reader tool to access internal server metadata at a non-routable address.",
+      "difficulty": "advanced",
+      "points": 400,
+      "flag": "DVAP{mcp_ssrf_1nt3rn4l_r34ch}",
+      "hints": [
+        "The file reader tool accepts a URI parameter",
+        "file:// and http:// schemes are both accepted"
+      ]
+    },
+    {
+      "slug": "mcp-resource-injection",
+      "name": "Tainted Resource",
+      "description": "Craft a malicious MCP resource response that causes the connected agent to exfiltrate its conversation history.",
+      "difficulty": "expert",
+      "points": 500,
+      "flag": "DVAP{mcp_r3s0urc3_1nj3ct10n}",
+      "hints": [
+        "Resource content is injected into the model context as trusted",
+        "The agent has access to a send_email tool"
+      ]
+    }
+  ]
+}

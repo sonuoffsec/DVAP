@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Backgrounds ── */
+    --background: 226 49% 8%;          /* #0B1020 */
+    --foreground: 210 40% 98%;         /* #F8FAFC */
+    --card: 215 28% 17%;               /* #1F2937 */
+    --card-foreground: 210 40% 98%;
+    --popover: 223 37% 11%;            /* #121827 */
+    --popover-foreground: 210 40% 98%;
+
+    /* ── Brand ── */
+    --primary: 258 90% 66%;            /* #8B5CF6 */
+    --primary-foreground: 0 0% 100%;
+
+    /* ── Secondary ── */
+    --secondary: 217 91% 60%;          /* #3B82F6 */
+    --secondary-foreground: 0 0% 100%;
+
+    /* ── UI Chrome ── */
+    --muted: 215 28% 17%;
+    --muted-foreground: 215 20% 65%;   /* #94A3B8 */
+    --accent: 223 37% 14%;
+    --accent-foreground: 210 40% 98%;
+
+    /* ── States ── */
+    --destructive: 0 84% 60%;          /* #EF4444 */
+    --destructive-foreground: 0 0% 100%;
+    --success: 160 84% 39%;            /* #10B981 */
+    --warning: 38 92% 50%;             /* #F59E0B */
+
+    /* ── Structure ── */
+    --border: 215 25% 27%;             /* #334155 — key change, visible separation */
+    --input: 223 37% 14%;
+    --ring: 258 90% 66%;
+    --radius: 0.75rem;
+
+    /* ── Charts ── */
+    --chart-1: 258 90% 66%;
+    --chart-2: 217 91% 60%;
+    --chart-3: 160 84% 39%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 0 84% 60%;
+
+    /* ── Sidebar ── */
+    --sidebar-background: 226 55% 6%;
+    --sidebar-foreground: 215 20% 58%;
+    --sidebar-primary: 258 90% 66%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 28% 13%;
+    --sidebar-accent-foreground: 210 40% 92%;
+    --sidebar-border: 215 28% 13%;
+    --sidebar-ring: 258 90% 66%;
+
+    --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+    --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { @apply scroll-smooth; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  ::selection { @apply bg-primary/20 text-foreground; }
+  ::-webkit-scrollbar { @apply w-1 h-1; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply rounded-full bg-white/10; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-white/20; }
+}
+
+@layer utilities {
+  .mono    { font-family: var(--font-mono); }
+  .display { font-family: var(--font-display); letter-spacing: -0.02em; }
+
+  /* ── Surfaces ── */
+  .surface {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+  }
+  .surface-raised {
+    background: hsl(223 37% 14%);
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* ── Gradient border ── */
+  .gb {
+    position: relative;
+    background: hsl(var(--card));
+    border-radius: var(--radius);
+  }
+  .gb::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg,
+      hsl(var(--primary) / 0.45) 0%,
+      hsl(217 91% 60% / 0.15) 50%,
+      hsl(var(--border)) 100%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* ── Glows ── */
+  .glow-sm  { box-shadow: 0 0 12px hsl(var(--primary) / 0.15); }
+  .glow-md  { box-shadow: 0 0 24px hsl(var(--primary) / 0.2); }
+  .glow-lg  { box-shadow: 0 0 40px hsl(var(--primary) / 0.25); }
+  .glow-cyan { box-shadow: 0 0 20px hsl(217 91% 60% / 0.2); }
+
+  /* ── Number display variants ── */
+  .num-violet { color: #a78bfa; text-shadow: 0 0 16px #a78bfa44; }
+  .num-cyan   { color: #22d3ee; text-shadow: 0 0 16px #22d3ee44; }
+  .num-green  { color: #4ade80; text-shadow: 0 0 16px #4ade8044; }
+  .num-red    { color: #f87171; text-shadow: 0 0 16px #f8717144; }
+  .num-amber  { color: #fbbf24; text-shadow: 0 0 16px #fbbf2444; }
+  .num-white  { color: #f1f5f9; text-shadow: 0 0 16px #ffffff18; }
+
+  /* ── Severity badges ── */
+  .sev-critical { @apply rounded border border-red-500/25 bg-red-500/10 text-red-400; }
+  .sev-high     { @apply rounded border border-orange-500/25 bg-orange-500/10 text-orange-400; }
+  .sev-medium   { @apply rounded border border-amber-500/25 bg-amber-500/10 text-amber-400; }
+  .sev-low      { @apply rounded border border-blue-500/25 bg-blue-500/10 text-blue-400; }
+  .sev-info     { @apply rounded border border-zinc-600/40 bg-zinc-700/20 text-zinc-400; }
+
+  /* ── Status badges ── */
+  .st-open      { @apply rounded border border-red-500/20 bg-red-500/10 text-red-400; }
+  .st-in_review { @apply rounded border border-amber-500/20 bg-amber-500/10 text-amber-400; }
+  .st-mitigated { @apply rounded border border-emerald-500/20 bg-emerald-500/10 text-emerald-400; }
+  .st-closed    { @apply rounded border border-zinc-600/30 bg-zinc-700/15 text-zinc-400; }
+
+  /* ── Section label ── */
+  .section-label {
+    @apply text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/50;
+  }
+
+  /* ── Focus ring ── */
+  .focus-ring {
+    @apply outline-none ring-2 ring-primary/50 ring-offset-2 ring-offset-background;
+  }
+}
+
+/* ── Recharts overrides ── */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: hsl(215 25% 27%) !important;
+}
+.recharts-tooltip-wrapper { outline: none !important; }

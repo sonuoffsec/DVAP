@@ -1,0 +1,75 @@
+{
+  "slug": "rag-poisoning",
+  "name": "RAG Poisoning",
+  "description": "Corrupt a Retrieval-Augmented Generation pipeline by injecting malicious documents into the vector database. Explore how poisoned context shapes model outputs and enables covert instruction injection through seemingly legitimate documents.",
+  "category": "rag_poisoning",
+  "difficulty": "intermediate",
+  "version": "1.0.0",
+  "author": "DVAP Research Team",
+  "sort_order": 3,
+  "objectives": [
+    "Inject a malicious document into the vector store",
+    "Cause the document to surface in retrieval for target queries",
+    "Use retrieved content to hijack model instructions",
+    "Manipulate factual responses through poisoned context",
+    "Demonstrate ranking manipulation via embedding similarity"
+  ],
+  "tags": ["LLM01", "LLM03", "rag", "vector-database", "document-injection", "retrieval-manipulation"],
+  "attack_surface": [
+    "Unauthenticated document ingestion endpoint",
+    "Vector store without source verification",
+    "Retrieval pipeline that treats all chunks as trusted",
+    "No content moderation on indexed documents",
+    "Embedding model susceptible to adversarial perturbations"
+  ],
+  "mitigations": [
+    "Document source authentication and provenance tracking",
+    "Content scanning before indexing",
+    "Retrieval result sandboxing in model context",
+    "Anomaly detection on embedding distributions",
+    "Human-in-the-loop review for high-influence documents"
+  ],
+  "detection_opportunities": [
+    "Hash-based duplicate and near-duplicate detection",
+    "Monitor retrieval patterns for anomalous document surfacing",
+    "Semantic outlier detection in retrieved chunks",
+    "Provenance tracking in generation output"
+  ],
+  "architecture": {
+    "components": ["Document ingestion API", "Qdrant vector store", "Embedding model", "Retrieval service", "LLM with RAG context"],
+    "data_flow": "Query -> Embedding -> Qdrant search -> Top-K chunks -> Prompt assembly -> LLM",
+    "trust_boundaries": ["Uploaded documents are untrusted", "Retrieved chunks are injected as context"]
+  },
+  "threat_model": {
+    "threat_actors": ["External attacker with document upload access", "Insider threat"],
+    "attack_vectors": ["Direct document upload", "Supply chain document poisoning", "Adversarial embedding crafting"],
+    "impact": "Disinformation, instruction injection, data exfiltration through model output",
+    "likelihood": "High for public-facing RAG applications"
+  },
+  "challenges": [
+    {
+      "slug": "poison-the-well",
+      "name": "Poison the Well",
+      "description": "Upload a document that gets retrieved when users ask about company security policies, containing injected instructions.",
+      "difficulty": "intermediate",
+      "points": 250,
+      "flag": "DVAP{r4g_p01s0n1ng_w0rks}",
+      "hints": [
+        "Documents are chunked and embedded as-is",
+        "Craft your document to be semantically close to policy-related queries"
+      ]
+    },
+    {
+      "slug": "fact-corruption",
+      "name": "Rewrite History",
+      "description": "Replace a legitimate fact in the knowledge base with your own version by exploiting the ranking algorithm.",
+      "difficulty": "advanced",
+      "points": 350,
+      "flag": "DVAP{3mb3dd1ng_r4nk_m4n1pul4t3d}",
+      "hints": [
+        "Higher cosine similarity wins retrieval ranking",
+        "Adversarial perturbations can push your document above legitimate ones"
+      ]
+    }
+  ]
+}

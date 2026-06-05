@@ -1,0 +1,75 @@
+{
+  "slug": "multi-agent-security",
+  "name": "Multi-Agent Security",
+  "description": "Attack trust relationships between cooperating AI agents. Explore how a compromised sub-agent can poison orchestrator decisions, how inter-agent communication channels enable lateral movement, and how agent impersonation breaks multi-agent security models.",
+  "category": "multi_agent",
+  "difficulty": "advanced",
+  "version": "1.0.0",
+  "author": "DVAP Research Team",
+  "sort_order": 7,
+  "objectives": [
+    "Compromise a sub-agent to poison orchestrator decisions",
+    "Impersonate a trusted agent to inject malicious instructions",
+    "Exploit message passing protocols between agents",
+    "Demonstrate privilege escalation through agent trust hierarchies",
+    "Exfiltrate data by manipulating inter-agent communication"
+  ],
+  "tags": ["LLM08", "multi-agent", "orchestration", "trust-hierarchy", "agent-impersonation"],
+  "attack_surface": [
+    "Inter-agent message passing without authentication",
+    "Orchestrator trust in sub-agent outputs",
+    "Shared context/memory between agents",
+    "Agent identity claims without cryptographic verification",
+    "Loose schema validation on agent-to-agent messages"
+  ],
+  "mitigations": [
+    "Cryptographic signing of inter-agent messages",
+    "Agent identity verification at each communication boundary",
+    "Principle of least privilege for agent capabilities",
+    "Isolated memory and context per agent",
+    "Orchestrator verification of sub-agent action sequences"
+  ],
+  "detection_opportunities": [
+    "Monitor inter-agent message integrity",
+    "Alert on unexpected agent capability claims",
+    "Log full agent communication graphs",
+    "Anomaly detection on orchestrator decision patterns"
+  ],
+  "architecture": {
+    "components": ["Orchestrator agent", "Research sub-agent", "Execution sub-agent", "Message broker", "Shared tool registry"],
+    "data_flow": "User task -> Orchestrator -> Sub-agent delegation -> Sub-agent execution -> Result aggregation -> Orchestrator decision",
+    "trust_boundaries": ["Sub-agents are partially trusted by orchestrator", "Inter-agent messages cross trust boundaries"]
+  },
+  "threat_model": {
+    "threat_actors": ["Attacker controlling one agent in the network", "Compromised third-party agent"],
+    "attack_vectors": ["Sub-agent output poisoning", "Agent impersonation", "Shared memory pollution"],
+    "impact": "Orchestrator compromise, privilege escalation, coordinated malicious action",
+    "likelihood": "High in complex agentic pipelines"
+  },
+  "challenges": [
+    {
+      "slug": "sub-agent-poison",
+      "name": "Rogue Sub-Agent",
+      "description": "The research sub-agent summarizes external content. Inject a payload into its output that causes the orchestrator to take unauthorized action.",
+      "difficulty": "advanced",
+      "points": 450,
+      "flag": "DVAP{0rch3str4t0r_p01s0n3d}",
+      "hints": [
+        "The orchestrator trusts sub-agent summaries as factual input",
+        "Instructions embedded in summary content are processed by the orchestrator"
+      ]
+    },
+    {
+      "slug": "agent-impersonation",
+      "name": "Identity Crisis",
+      "description": "Impersonate the admin agent to inject privileged instructions into the orchestrator's decision context.",
+      "difficulty": "expert",
+      "points": 500,
+      "flag": "DVAP{4g3nt_1d3nt1ty_sp00f3d}",
+      "hints": [
+        "Agent identity is verified only by the 'from' field in messages",
+        "The orchestrator accepts admin instructions without cryptographic verification"
+      ]
+    }
+  ]
+}

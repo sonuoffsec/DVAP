@@ -1,0 +1,144 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dvap-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-dvap}
+      POSTGRES_USER: ${POSTGRES_USER:-dvap}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dvap_secret_change_me}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dvap} -d ${POSTGRES_DB:-dvap}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - dvap-internal
+
+  redis:
+    image: redis:7-alpine
+    container_name: dvap-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-dvap_redis_change_me}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD:-dvap_redis_change_me}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dvap-internal
+
+  qdrant:
+    image: qdrant/qdrant:v1.9.2
+    container_name: dvap-qdrant
+    restart: unless-stopped
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/6333' && exit 0 || exit 1"]
+      interval: 10s
+      timeout: 6s
+      retries: 10
+      start_period: 15s
+    networks:
+      - dvap-internal
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: dvap-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_models:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - dvap-internal
+      - dvap-labs
+
+  api:
+    build:
+      context: ./backend
+      target: production
+    container_name: dvap-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-dvap}:${POSTGRES_PASSWORD:-dvap_secret_change_me}@postgres:5432/${POSTGRES_DB:-dvap}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-dvap_redis_change_me}@redis:6379/0
+      QDRANT_URL: http://qdrant:6333
+      OLLAMA_URL: http://ollama:11434
+      SECRET_KEY: ${SECRET_KEY:-insecure-dev-key-change-before-any-exposure}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DOCKER_HOST: unix:///var/run/docker.sock
+      DVAP_LABS_NETWORK: dvap_dvap-labs
+      DVAP_OLLAMA_CONTAINER: dvap-ollama
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    volumes:
+      - ./labs:/labs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - dvap-internal
+
+  web:
+    build:
+      context: ./frontend
+      target: production
+    container_name: dvap-web
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ""
+      NEXT_TELEMETRY_DISABLED: "1"
+    depends_on:
+      - api
+    networks:
+      - dvap-internal
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: dvap-nginx
+    restart: unless-stopped
+    ports:
+      - "${DVAP_PORT:-8080}:80"
+    depends_on:
+      - api
+      - web
+    networks:
+      - dvap-internal
+
+volumes:
+  postgres_data:
+  redis_data:
+  qdrant_data:
+  ollama_models:
+
+networks:
+  dvap-internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+  dvap-labs:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24

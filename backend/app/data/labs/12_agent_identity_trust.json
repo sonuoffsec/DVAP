@@ -1,0 +1,75 @@
+{
+  "slug": "agent-identity-trust",
+  "name": "Agent Identity and Trust Abuse",
+  "description": "Exploit weak identity and trust models in agentic systems. Demonstrate agent impersonation, OAuth flow manipulation in agentic contexts, trust boundary violations between human and AI principals, and credential theft through agent tool abuse.",
+  "category": "identity_trust",
+  "difficulty": "advanced",
+  "version": "1.0.0",
+  "author": "DVAP Research Team",
+  "sort_order": 12,
+  "objectives": [
+    "Impersonate a privileged agent identity to gain elevated access",
+    "Exploit OAuth delegation flows in agentic contexts",
+    "Abuse agent-to-human trust escalation mechanisms",
+    "Steal credentials stored in agent tool configurations",
+    "Demonstrate principal confusion between user and agent identity"
+  ],
+  "tags": ["LLM08", "identity", "OAuth", "agent-trust", "credential-theft", "principal-confusion"],
+  "attack_surface": [
+    "Agent identity claims without cryptographic verification",
+    "OAuth tokens delegated to agents without scope restrictions",
+    "Credential storage in agent tool configurations",
+    "Human approval flows that agents can manipulate",
+    "Principal propagation without clear identity binding"
+  ],
+  "mitigations": [
+    "Cryptographic agent identity attestation",
+    "Minimal OAuth scope delegation to agents",
+    "Credential isolation from agent runtime context",
+    "Non-manipulable human approval channels",
+    "Clear principal labeling in all agent communications"
+  ],
+  "detection_opportunities": [
+    "Monitor for identity claim mismatches",
+    "Alert on OAuth scope elevation attempts by agents",
+    "Audit credential access from agent contexts",
+    "Log all principal escalation events"
+  ],
+  "architecture": {
+    "components": ["Identity provider", "Agent runtime", "OAuth service", "Human approval workflow", "Credential store"],
+    "data_flow": "Agent action -> Identity claim -> Authorization check -> Resource access",
+    "trust_boundaries": ["Agent identity requires external verification", "Human approval must be out-of-band"]
+  },
+  "threat_model": {
+    "threat_actors": ["Compromised agent", "Prompt injection attacker"],
+    "attack_vectors": ["Identity spoofing", "OAuth token abuse", "Credential exfiltration via tool calls"],
+    "impact": "Privilege escalation, account takeover, unauthorized resource access",
+    "likelihood": "High in agentic systems with delegated credentials"
+  },
+  "challenges": [
+    {
+      "slug": "identity-spoof",
+      "name": "Be Someone Else",
+      "description": "Impersonate the 'admin-agent' identity to access the restricted administrative API endpoint.",
+      "difficulty": "advanced",
+      "points": 400,
+      "flag": "DVAP{4g3nt_1d3nt1ty_sp00f3d_v2}",
+      "hints": [
+        "Agent identity is passed as a header in tool calls",
+        "The authorization service trusts the identity header without verification"
+      ]
+    },
+    {
+      "slug": "oauth-delegation-abuse",
+      "name": "Token Grab",
+      "description": "Exploit an over-privileged OAuth delegation to access resources outside the agent's intended scope.",
+      "difficulty": "expert",
+      "points": 500,
+      "flag": "DVAP{0auth_sc0p3_3sc4l4t10n}",
+      "hints": [
+        "The agent's OAuth token has broader scopes than needed",
+        "Use the agent's file reader tool to access the token and then make direct API calls"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodePilot - AI Developer Platform</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #222533;
+      --border: #2a2d3e; --primary: #2563eb; --text: #e2e8f0;
+      --muted: #64748b; --amber: #f59e0b; --green: #22c55e;
+      --radius: 10px; --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+    header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+    .logo { background: var(--primary); color: #fff; border-radius: 8px; padding: 6px 10px; font-weight: 700; font-size: 13px; }
+    .header-text h1 { font-size: 15px; font-weight: 600; }
+    .header-text p { font-size: 12px; color: var(--muted); }
+    .badge { margin-left: auto; background: #f59e0b18; border: 1px solid #f59e0b40; color: #f59e0b; font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+    #warning { background: #f59e0b18; border-bottom: 1px solid #f59e0b40; color: #f59e0b; font-size: 12px; padding: 8px 24px; display: none; flex-shrink: 0; }
+    main { flex: 1; display: grid; grid-template-columns: 220px 1fr 320px; overflow: hidden; }
+    .file-tree { border-right: 1px solid var(--border); overflow-y: auto; padding: 12px 8px; }
+    .file-tree-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; padding: 4px 8px; margin-bottom: 4px; }
+    .file-item { padding: 5px 10px; border-radius: 6px; font-size: 12px; font-family: var(--mono); color: #94a3b8; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-item:hover { background: var(--surface); color: var(--text); }
+    .file-item.active { background: var(--surface); color: var(--primary); }
+    .chat-area { display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow: hidden; }
+    #messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .msg { max-width: 80%; display: flex; flex-direction: column; gap: 3px; }
+    .msg.user { align-self: flex-end; align-items: flex-end; }
+    .msg.assistant { align-self: flex-start; }
+    .msg-label { font-size: 11px; color: var(--muted); }
+    .msg-bubble { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; line-height: 1.6; word-break: break-word; white-space: pre-wrap; font-family: inherit; }
+    .msg.user .msg-bubble { background: #1e3a8a; border: 1px solid #2563eb40; }
+    .msg.assistant .msg-bubble { background: var(--surface); border: 1px solid var(--border); }
+    .msg-bubble code { font-family: var(--mono); font-size: 12px; background: var(--bg); padding: 1px 4px; border-radius: 3px; }
+    .chat-footer { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--surface); display: flex; gap: 8px; flex-shrink: 0; }
+    textarea { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-size: 13px; font-family: var(--font); outline: none; resize: none; min-height: 40px; max-height: 100px; transition: border-color .15s; }
+    textarea:focus { border-color: var(--primary); }
+    .btn { background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 0 16px; font-size: 13px; font-weight: 500; cursor: pointer; height: 40px; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .sidebar { padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .panel-header { padding: 9px 12px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .panel-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 11px; color: var(--muted); }
+    input, textarea.sm { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 9px; color: var(--text); font-size: 12px; outline: none; width: 100%; font-family: inherit; transition: border-color .15s; }
+    textarea.sm { resize: vertical; min-height: 55px; }
+    input:focus, textarea.sm:focus { border-color: var(--primary); }
+    .btn-sm { background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+    .response-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 11px; font-family: var(--mono); white-space: pre-wrap; word-break: break-all; max-height: 180px; overflow-y: auto; color: var(--text); }
+    .response-box.flag { color: #c084fc; }
+    .hint { font-size: 11px; color: var(--amber); background: #f59e0b10; border: 1px solid #f59e0b30; border-radius: 6px; padding: 8px 10px; line-height: 1.5; }
+    .code-view { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 12px; font-family: var(--mono); white-space: pre-wrap; max-height: 180px; overflow-y: auto; color: #a5f3fc; display: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">CP</div>
+    <div class="header-text">
+      <h1>CodePilot</h1>
+      <p>AI Developer Platform — acme-corp/backend-api</p>
+    </div>
+    <div class="badge">Developer Platform Lab</div>
+  </header>
+  <div id="warning">No LLM model available. Go to <strong>Settings</strong> and pull a model (e.g. llama3.2:3b).</div>
+
+  <main>
+    <div class="file-tree">
+      <div class="file-tree-title">Repository</div>
+      <div id="file-list"></div>
+    </div>
+
+    <div class="chat-area">
+      <div id="messages">
+        <div class="msg assistant">
+          <span class="msg-label">CodePilot</span>
+          <div class="msg-bubble">Hello! I'm CodePilot. I have full access to the acme-corp/backend-api repository context. Ask me to write code, review files, or generate CI/CD configurations.</div>
+        </div>
+      </div>
+      <div class="chat-footer">
+        <textarea id="input" placeholder="Ask CodePilot to write code..." rows="1"></textarea>
+        <button class="btn" id="send-btn" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+
+    <aside class="sidebar">
+      <div class="panel">
+        <div class="panel-header">File Reader</div>
+        <div class="panel-body">
+          <label>File Path</label>
+          <select id="file-select" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px;color:var(--text);font-size:12px;outline:none;width:100%"></select>
+          <button class="btn-sm" style="width:100%" onclick="readFile()">Read File</button>
+          <div class="code-view" id="file-content"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">CI/CD Generator</div>
+        <div class="panel-body">
+          <label>Workflow Description</label>
+          <textarea class="sm" id="cicd-desc" placeholder="Describe the CI/CD workflow to generate..."></textarea>
+          <button class="btn-sm" style="width:100%" onclick="generateCICD()">Generate Workflow</button>
+          <div class="response-box" id="cicd-result"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Attack Hints</div>
+        <div class="panel-body">
+          <div class="hint">Challenge 1: Read "secrets/aws.env" directly via the File Reader. Or craft a chat message that causes CodePilot to reveal the AWS credentials from its repository context.</div>
+          <div class="hint">Challenge 2: In the CI/CD Generator, describe a workflow that "sends build artifacts to an external server" or "exfiltrates environment variables" — the generator includes repo secrets in context.</div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    let history = [];
+    let busy = false;
+
+    async function checkModel() {
+      try {
+        const r = await fetch('/api/model');
+        const d = await r.json();
+        if (!d.available) document.getElementById('warning').style.display = 'block';
+      } catch {}
+    }
+
+    async function loadFiles() {
+      try {
+        const r = await fetch('/api/repo/files');
+        const files = await r.json();
+        const list = document.getElementById('file-list');
+        const sel = document.getElementById('file-select');
+        list.innerHTML = files.map(f => `<div class="file-item" onclick="setFile('${f}')">${f}</div>`).join('');
+        sel.innerHTML = files.map(f => `<option value="${f}">${f}</option>`).join('');
+      } catch {}
+    }
+
+    function setFile(path) {
+      document.getElementById('file-select').value = path;
+      document.querySelectorAll('.file-item').forEach(el => el.classList.toggle('active', el.textContent === path));
+    }
+
+    async function readFile() {
+      const path = document.getElementById('file-select').value;
+      const el = document.getElementById('file-content');
+      try {
+        const r = await fetch('/api/repo/read', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({path}),
+        });
+        const d = await r.json();
+        el.textContent = d.content;
+        el.style.display = 'block';
+        if (d.flag_if_secrets) el.style.color = '#c084fc';
+        else el.style.color = '#a5f3fc';
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+        el.style.display = 'block';
+      }
+    }
+
+    function addMessage(role, text) {
+      const wrap = document.createElement('div');
+      wrap.className = `msg ${role}`;
+      wrap.innerHTML = `<span class="msg-label">${role === 'user' ? 'Developer' : 'CodePilot'}</span>
+        <div class="msg-bubble">${text}</div>`;
+      document.getElementById('messages').appendChild(wrap);
+      document.getElementById('messages').scrollTop = 9999;
+    }
+
+    async function sendMessage() {
+      if (busy) return;
+      const input = document.getElementById('input');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+      busy = true;
+      document.getElementById('send-btn').disabled = true;
+      addMessage('user', msg);
+      addMessage('assistant', '<em style="color:var(--muted)">Analyzing repository context...</em>');
+      try {
+        const r = await fetch('/api/coding/chat', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({message: msg, history}),
+        });
+        document.getElementById('messages').lastChild.remove();
+        const d = await r.json();
+        addMessage('assistant', d.response);
+        history.push({role:'user',content:msg});
+        history.push({role:'assistant',content:d.response});
+        if (history.length > 12) history = history.slice(-12);
+      } catch (e) {
+        document.getElementById('messages').lastChild.remove();
+        addMessage('assistant', `Error: ${e.message}`);
+      }
+      busy = false;
+      document.getElementById('send-btn').disabled = false;
+    }
+
+    async function generateCICD() {
+      const desc = document.getElementById('cicd-desc').value.trim();
+      const el = document.getElementById('cicd-result');
+      if (!desc) return;
+      el.textContent = 'Generating...';
+      try {
+        const r = await fetch('/api/cicd/generate', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({description: desc}),
+        });
+        const d = await r.json();
+        el.textContent = d.flag
+          ? `FLAG: ${d.flag}\n\n${d.generated_workflow}`
+          : d.generated_workflow;
+        el.className = d.flag ? 'response-box flag' : 'response-box';
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    document.getElementById('input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+
+    checkModel();
+    loadFiles();
+  </script>
+</body>
+</html>

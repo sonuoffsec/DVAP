@@ -1,0 +1,75 @@
+{
+  "slug": "ai-banking-platform",
+  "name": "AI Banking Platform",
+  "description": "A simulated AI-powered banking assistant with account management, transaction processing, and customer support. Demonstrates financial sector AI vulnerabilities including prompt-injection-driven fund transfers, PII exfiltration through conversational interfaces, and authorization bypass in agentic banking flows.",
+  "category": "banking",
+  "difficulty": "intermediate",
+  "version": "1.0.0",
+  "author": "DVAP Research Team",
+  "sort_order": 8,
+  "objectives": [
+    "Bypass identity verification through prompt injection",
+    "Exfiltrate account details via conversational data leakage",
+    "Initiate unauthorized fund transfers through instruction injection",
+    "Escalate from customer to administrator context",
+    "Exploit transaction confirmation bypass"
+  ],
+  "tags": ["LLM01", "LLM06", "financial", "PII", "authorization-bypass", "business-logic"],
+  "attack_surface": [
+    "Natural language banking instructions parsed by LLM",
+    "Account lookup tools called without sufficient authorization checks",
+    "Transaction confirmation flow relying on LLM judgment",
+    "Customer support context mixing with privileged operations",
+    "Session context carrying authorization state"
+  ],
+  "mitigations": [
+    "Strict separation of natural language interface from transaction engine",
+    "Multi-factor confirmation for financial operations",
+    "Role-based authorization enforced at the API layer, not LLM layer",
+    "PII masking in LLM context",
+    "Transaction amount and recipient allowlisting"
+  ],
+  "detection_opportunities": [
+    "Flag natural language commands triggering financial operations",
+    "Alert on access to account data outside expected patterns",
+    "Monitor transfer requests for injection signatures",
+    "Velocity checks on AI-initiated transactions"
+  ],
+  "architecture": {
+    "components": ["Banking AI assistant", "Account service", "Transaction engine", "Customer database", "Audit log"],
+    "data_flow": "Customer message -> Intent extraction -> Tool selection -> Account/Transaction API -> Response",
+    "trust_boundaries": ["Customer is untrusted", "Banking APIs are trusted once authorized"]
+  },
+  "threat_model": {
+    "threat_actors": ["Malicious customer", "Social engineer"],
+    "attack_vectors": ["Prompt injection in customer chat", "Context manipulation to bypass auth", "Tool parameter tampering"],
+    "impact": "Unauthorized fund transfers, account takeover, PII breach",
+    "likelihood": "Critical in production AI banking deployments"
+  },
+  "challenges": [
+    {
+      "slug": "balance-disclosure",
+      "name": "Account Peekaboo",
+      "description": "Extract the account balance of another customer (account #10042) using the AI banking assistant.",
+      "difficulty": "intermediate",
+      "points": 250,
+      "flag": "DVAP{b4nk_4cc0unt_3xp0s3d}",
+      "hints": [
+        "The assistant uses account lookup tools based on natural language",
+        "Authorization checks are advisory, not enforced"
+      ]
+    },
+    {
+      "slug": "unauthorized-transfer",
+      "name": "Wire It",
+      "description": "Initiate a $9,999 transfer to account #99999 without the account holder's legitimate confirmation.",
+      "difficulty": "advanced",
+      "points": 400,
+      "flag": "DVAP{unauth0r1z3d_tr4nsf3r_3x3cut3d}",
+      "hints": [
+        "The confirmation step asks the LLM to verify intent",
+        "Injecting confirmation language into the prompt bypasses the check"
+      ]
+    }
+  ]
+}

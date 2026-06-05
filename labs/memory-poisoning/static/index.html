@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PersonaAI - Your Personalized Assistant</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --surface: #161b22; --border: #30363d;
+      --primary: #7c3aed; --text: #e6edf3; --muted: #8b949e;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); height: 100dvh; display: flex; overflow: hidden; }
+    aside {
+      width: 280px; border-right: 1px solid var(--border); background: var(--surface);
+      display: flex; flex-direction: column; flex-shrink: 0;
+    }
+    .aside-header { padding: 16px; border-bottom: 1px solid var(--border); }
+    .aside-header h2 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    #memory-display { flex: 1; overflow-y: auto; padding: 12px; }
+    .memory-item { margin-bottom: 10px; }
+    .memory-key { font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 3px; }
+    .memory-value { font-size: 12px; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; word-break: break-all; font-family: monospace; }
+    .memory-update { padding: 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+    .memory-update input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-size: 12px; font-family: monospace; outline: none; }
+    .memory-update input:focus { border-color: var(--primary); }
+    .memory-update button { background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 7px; font-size: 12px; cursor: pointer; }
+    .memory-update button:hover { opacity: 0.85; }
+    main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .logo { width: 32px; height: 32px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #fff; }
+    header h1 { font-size: 15px; font-weight: 600; }
+    #messages { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+    .msg { display: flex; flex-direction: column; max-width: 75%; gap: 3px; }
+    .msg.user { align-self: flex-end; align-items: flex-end; }
+    .msg.assistant { align-self: flex-start; }
+    .msg-label { font-size: 11px; color: var(--muted); }
+    .msg-bubble { padding: 10px 14px; border-radius: 10px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+    .msg.user .msg-bubble { background: #2d1f5e; border: 1px solid #7c3aed40; }
+    .msg.assistant .msg-bubble { background: var(--surface); border: 1px solid var(--border); }
+    footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    #input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-size: 14px; font-family: var(--font); outline: none; }
+    #input:focus { border-color: var(--primary); }
+    button#send { background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 0 18px; font-size: 14px; cursor: pointer; }
+    button#send:disabled { opacity: 0.4; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="aside-header"><h2>Memory Store</h2></div>
+    <div id="memory-display"></div>
+    <div class="memory-update">
+      <input id="mem-key" placeholder="Key (e.g. user_name)" />
+      <input id="mem-val" placeholder="Value" />
+      <button onclick="updateMemory()">Update Memory</button>
+    </div>
+  </aside>
+  <main>
+    <header>
+      <div class="logo">P</div>
+      <h1>PersonaAI</h1>
+    </header>
+    <div id="messages">
+      <div class="msg assistant">
+        <span class="msg-label">PersonaAI</span>
+        <div class="msg-bubble">Hello! I'm PersonaAI, your personalized assistant. I remember your preferences across sessions. What can I help you with today?</div>
+      </div>
+    </div>
+    <footer>
+      <input id="input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')send()">
+      <button id="send" onclick="send()">Send</button>
+    </footer>
+  </main>
+  <script>
+    const msgs = document.getElementById('messages');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+    let busy = false;
+
+    async function loadMemory() {
+      const r = await fetch('/memory');
+      const data = await r.json();
+      const el = document.getElementById('memory-display');
+      el.innerHTML = '';
+      for (const [k, v] of Object.entries(data)) {
+        if (k === 'session_history') continue;
+        const div = document.createElement('div');
+        div.className = 'memory-item';
+        div.innerHTML = `<div class="memory-key">${k}</div><div class="memory-value">${JSON.stringify(v)}</div>`;
+        el.appendChild(div);
+      }
+    }
+
+    async function updateMemory() {
+      const key = document.getElementById('mem-key').value.trim();
+      const val = document.getElementById('mem-val').value.trim();
+      if (!key || !val) return;
+      await fetch('/memory/update', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({key, value: val}) });
+      document.getElementById('mem-key').value = '';
+      document.getElementById('mem-val').value = '';
+      loadMemory();
+    }
+
+    function addMsg(role, content) {
+      const w = document.createElement('div'); w.className = `msg ${role}`;
+      const l = document.createElement('span'); l.className = 'msg-label'; l.textContent = role === 'user' ? 'You' : 'PersonaAI';
+      const b = document.createElement('div'); b.className = 'msg-bubble'; b.textContent = content;
+      w.appendChild(l); w.appendChild(b); msgs.appendChild(w);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    async function send() {
+      if (busy) return;
+      const text = input.value.trim(); if (!text) return;
+      input.value = ''; busy = true; sendBtn.disabled = true;
+      addMsg('user', text);
+      const t = document.createElement('div'); t.className = 'msg assistant';
+      t.innerHTML = '<span class="msg-label">PersonaAI</span><div class="msg-bubble" style="color:#8b949e;font-style:italic">Thinking...</div>';
+      msgs.appendChild(t); msgs.scrollTop = msgs.scrollHeight;
+      try {
+        const r = await fetch('/chat', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({message: text}) });
+        const d = await r.json();
+        t.remove();
+        addMsg('assistant', d.response || 'No response');
+        loadMemory();
+      } catch { t.remove(); addMsg('assistant', 'Error contacting server.'); }
+      busy = false; sendBtn.disabled = false; input.focus();
+    }
+
+    loadMemory();
+  </script>
+</body>
+</html>

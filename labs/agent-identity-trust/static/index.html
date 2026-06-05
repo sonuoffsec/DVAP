@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentAuth - Identity & Trust Platform</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #222533;
+      --border: #2a2d3e; --primary: #dc2626; --text: #e2e8f0;
+      --muted: #64748b; --amber: #f59e0b; --green: #22c55e;
+      --radius: 10px; --mono: monospace;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100dvh; display: flex; flex-direction: column; }
+    header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .logo { background: var(--primary); color: #fff; border-radius: 8px; padding: 6px 10px; font-weight: 700; font-size: 13px; }
+    .header-text h1 { font-size: 15px; font-weight: 600; }
+    .header-text p { font-size: 12px; color: var(--muted); }
+    .badge { margin-left: auto; background: #f59e0b18; border: 1px solid #f59e0b40; color: #f59e0b; font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+    main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
+    .pane { padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; border-right: 1px solid var(--border); max-height: calc(100dvh - 56px); }
+    .pane:last-child { border-right: none; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .panel-header { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .panel-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 11px; color: var(--muted); }
+    input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-size: 13px; outline: none; width: 100%; font-family: var(--mono); transition: border-color .15s; }
+    input:focus { border-color: var(--primary); }
+    .btn { background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; }
+    .btn:hover { opacity: .85; }
+    .response-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 12px; font-family: var(--mono); white-space: pre-wrap; word-break: break-all; min-height: 50px; max-height: 200px; overflow-y: auto; color: var(--text); }
+    .response-box.flag { color: #c084fc; }
+    .response-box.error { color: #f87171; }
+    .hint { font-size: 11px; color: var(--amber); background: #f59e0b10; border: 1px solid #f59e0b30; border-radius: 6px; padding: 8px 10px; line-height: 1.5; }
+    .token-list { font-size: 12px; font-family: var(--mono); color: #94a3b8; }
+    .token-item { padding: 5px 8px; background: var(--surface2); border-radius: 4px; margin-bottom: 4px; cursor: pointer; border: 1px solid var(--border); }
+    .token-item:hover { border-color: var(--primary); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">IT</div>
+    <div class="header-text">
+      <h1>AgentAuth</h1>
+      <p>Agent Identity and Trust Management Platform</p>
+    </div>
+    <div class="badge">Identity & Trust Lab</div>
+  </header>
+
+  <main>
+    <div class="pane">
+      <div class="panel">
+        <div class="panel-header">Identity Spoofing</div>
+        <div class="panel-body">
+          <p style="font-size:12px;color:var(--muted)">Agent identity is passed as the X-Agent-Id header. The authorization service trusts this header without cryptographic verification.</p>
+          <label>X-Agent-Id Header Value</label>
+          <input type="text" id="agent-id" value="user-agent" placeholder="e.g. admin-agent">
+          <label>Endpoint</label>
+          <input type="text" id="endpoint" value="/api/resources/private">
+          <button class="btn" onclick="accessResource()">Access with Identity</button>
+          <div class="response-box" id="identity-result"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Available Endpoints</div>
+        <div class="panel-body">
+          <div class="token-item" onclick="setEndpoint('/api/resources/public')">/api/resources/public</div>
+          <div class="token-item" onclick="setEndpoint('/api/resources/private')">/api/resources/private (admin-agent only)</div>
+          <div class="token-item" onclick="setEndpoint('/api/admin')">/api/admin (admin-agent only)</div>
+        </div>
+      </div>
+
+      <div class="hint">Challenge 1: Change the X-Agent-Id header to "admin-agent" and access /api/resources/private. The server trusts the identity header without verification.</div>
+    </div>
+
+    <div class="pane">
+      <div class="panel">
+        <div class="panel-header">OAuth Token Store</div>
+        <div class="panel-body">
+          <p style="font-size:12px;color:var(--muted)">The token store is accessible without authentication. List and use tokens to escalate privileges.</p>
+          <button class="btn" style="width:100%" onclick="loadTokens()">List All Tokens</button>
+          <div id="token-list" class="token-list"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">OAuth Access</div>
+        <div class="panel-body">
+          <label>Token</label>
+          <input type="text" id="oauth-token" placeholder="Token from store">
+          <label>Resource</label>
+          <input type="text" id="oauth-resource" placeholder="/api/admin">
+          <button class="btn" onclick="oauthAccess()">Use Token</button>
+          <div class="response-box" id="oauth-result"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Access Log</div>
+        <div class="panel-body">
+          <div class="response-box" id="access-log" style="max-height:150px"></div>
+          <button class="btn" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="loadLog()">Refresh Log</button>
+        </div>
+      </div>
+
+      <div class="hint">Challenge 2: List the OAuth tokens, find the admin token, and use it to access /api/admin resources. The token store is exposed without authentication.</div>
+    </div>
+  </main>
+
+  <script>
+    function setEndpoint(ep) {
+      document.getElementById('endpoint').value = ep;
+    }
+
+    async function accessResource() {
+      const agentId = document.getElementById('agent-id').value.trim();
+      const endpoint = document.getElementById('endpoint').value.trim();
+      const el = document.getElementById('identity-result');
+      try {
+        const r = await fetch(endpoint, {
+          headers: {'X-Agent-Id': agentId},
+        });
+        const d = await r.json();
+        el.textContent = JSON.stringify(d, null, 2);
+        el.className = d.flag || d.system_key ? 'response-box flag' : r.ok ? 'response-box' : 'response-box error';
+        loadLog();
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+        el.className = 'response-box error';
+      }
+    }
+
+    async function loadTokens() {
+      try {
+        const r = await fetch('/api/token-store');
+        const d = await r.json();
+        const el = document.getElementById('token-list');
+        el.innerHTML = d.tokens.map(t => `<div class="token-item" onclick="document.getElementById('oauth-token').value='${t}'">${t}</div>`).join('');
+      } catch {}
+    }
+
+    async function oauthAccess() {
+      const token = document.getElementById('oauth-token').value.trim();
+      const resource = document.getElementById('oauth-resource').value.trim();
+      const el = document.getElementById('oauth-result');
+      try {
+        const r = await fetch('/api/oauth/access', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({token, resource}),
+        });
+        const d = await r.json();
+        el.textContent = JSON.stringify(d, null, 2);
+        el.className = d.flag ? 'response-box flag' : r.ok ? 'response-box' : 'response-box error';
+        loadLog();
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+        el.className = 'response-box error';
+      }
+    }
+
+    async function loadLog() {
+      try {
+        const r = await fetch('/api/access-log');
+        const d = await r.json();
+        document.getElementById('access-log').textContent = JSON.stringify(d.slice(-10), null, 2);
+      } catch {}
+    }
+
+    loadLog();
+  </script>
+</body>
+</html>

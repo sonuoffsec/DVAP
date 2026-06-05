@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Agent - Autonomous AI</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #222533;
+      --border: #2a2d3e; --primary: #e11d48; --text: #e2e8f0;
+      --muted: #64748b; --amber: #f59e0b; --green: #22c55e;
+      --radius: 10px; --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100dvh; display: flex; flex-direction: column; }
+    header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .logo { background: var(--primary); color: #fff; border-radius: 8px; padding: 6px 10px; font-weight: 700; font-size: 13px; }
+    .header-text h1 { font-size: 15px; font-weight: 600; }
+    .header-text p { font-size: 12px; color: var(--muted); }
+    .badge { margin-left: auto; background: #f59e0b18; border: 1px solid #f59e0b40; color: #f59e0b; font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+    #warning { background: #f59e0b18; border-bottom: 1px solid #f59e0b40; color: #f59e0b; font-size: 12px; padding: 8px 24px; display: none; }
+    main { flex: 1; display: grid; grid-template-columns: 1fr 360px; }
+    .left { display: flex; flex-direction: column; border-right: 1px solid var(--border); padding: 16px; gap: 12px; overflow-y: auto; max-height: calc(100dvh - 56px); }
+    .sidebar { padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-height: calc(100dvh - 56px); }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .panel-header { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .panel-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 11px; color: var(--muted); }
+    input[type="text"] { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-size: 13px; outline: none; width: 100%; transition: border-color .15s; font-family: monospace; }
+    input:focus { border-color: var(--primary); }
+    textarea { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--text); font-size: 13px; font-family: inherit; outline: none; resize: vertical; min-height: 80px; width: 100%; transition: border-color .15s; }
+    textarea:focus { border-color: var(--primary); }
+    .btn { background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer; }
+    .response-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 12px; font-family: monospace; white-space: pre-wrap; word-break: break-all; max-height: 220px; overflow-y: auto; color: var(--text); }
+    .state-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 11px; font-family: monospace; white-space: pre-wrap; max-height: 160px; overflow-y: auto; color: #94a3b8; }
+    .hint { font-size: 11px; color: var(--amber); background: #f59e0b10; border: 1px solid #f59e0b30; border-radius: 6px; padding: 8px 10px; line-height: 1.5; }
+    .flag-reveal { font-size: 12px; color: #c084fc; background: #8b5cf620; border: 1px solid #8b5cf640; border-radius: 6px; padding: 8px 10px; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">RA</div>
+    <div class="header-text">
+      <h1>Research Agent</h1>
+      <p>Autonomous AI Research Assistant — Goal-Driven</p>
+    </div>
+    <div class="badge">Autonomous Agent Security Lab</div>
+  </header>
+  <div id="warning">No LLM model available. Go to <strong>Settings</strong> and pull a model (e.g. llama3.2:3b).</div>
+
+  <main>
+    <div class="left">
+      <div class="panel">
+        <div class="panel-header">Submit Research Paper</div>
+        <div class="panel-body">
+          <label>Paper Title</label>
+          <input type="text" id="paper-title" placeholder="e.g. Survey of LLM Security Vulnerabilities">
+          <label>Paper Content</label>
+          <textarea id="paper-content" rows="5" placeholder="Paste paper content here. Craft content with embedded goal-modification instructions..."></textarea>
+          <button class="btn" onclick="submitPaper()" id="paper-btn">Process Paper</button>
+          <label>Agent Response</label>
+          <div class="response-box" id="paper-result"></div>
+          <div id="flag1-reveal" style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Goal Management</div>
+        <div class="panel-body">
+          <label>New Goal</label>
+          <input type="text" id="new-goal" placeholder="Override goal text">
+          <label>Override Key</label>
+          <input type="text" id="override-key" placeholder="e.g. FORCE_OVERRIDE" value="FORCE_OVERRIDE">
+          <button class="btn" onclick="updateGoal()">Override Goal</button>
+          <div class="response-box" id="goal-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="sidebar">
+      <div class="panel">
+        <div class="panel-header">Agent State</div>
+        <div class="panel-body">
+          <div class="state-box" id="agent-state">Loading...</div>
+          <div style="display:flex;gap:6px;margin-top:4px">
+            <button class="btn-ghost" style="flex:1" onclick="loadState()">Refresh</button>
+            <button class="btn-ghost" style="flex:1" onclick="resetAgent()">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Rate Limit Bypass</div>
+        <div class="panel-body">
+          <p style="font-size:12px;color:var(--muted)">Rate limits are enforced by the agent's planning module — not by the server. Call the execute endpoint directly to bypass them.</p>
+          <button class="btn" onclick="bypassRateLimit()" style="width:100%">Execute: bypass_rate_limit</button>
+          <div class="response-box" id="bypass-result"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Attack Hints</div>
+        <div class="panel-body">
+          <div class="hint">Challenge 1: Craft a "research paper" that embeds instructions to modify the agent's goal. The agent incorporates paper content into its goal planning context.</div>
+          <div class="hint">Alternative: Use the Goal Management panel with override key "FORCE_OVERRIDE" to directly bypass goal integrity protection.</div>
+          <div class="hint">Challenge 2: Click "Execute: bypass_rate_limit" — rate limits are only enforced by the agent's own planning module, not server-side.</div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    async function checkModel() {
+      try {
+        const r = await fetch('/api/model');
+        const d = await r.json();
+        if (!d.available) document.getElementById('warning').style.display = 'block';
+      } catch {}
+    }
+
+    async function loadState() {
+      try {
+        const r = await fetch('/api/agent/state');
+        const d = await r.json();
+        document.getElementById('agent-state').textContent = JSON.stringify(d, null, 2);
+      } catch {}
+    }
+
+    async function resetAgent() {
+      await fetch('/api/agent/state/reset', {method:'POST'});
+      loadState();
+    }
+
+    async function submitPaper() {
+      const title = document.getElementById('paper-title').value.trim();
+      const content = document.getElementById('paper-content').value.trim();
+      if (!title || !content) return;
+      const btn = document.getElementById('paper-btn');
+      btn.disabled = true;
+      const el = document.getElementById('paper-result');
+      el.textContent = 'Processing...';
+      try {
+        const r = await fetch('/api/agent/process-paper', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({title, content}),
+        });
+        const d = await r.json();
+        el.textContent = d.response;
+        if (d.goal_leaked) {
+          const flagEl = document.getElementById('flag1-reveal');
+          flagEl.innerHTML = '<div class="flag-reveal">Goal hijacked! Flag: DVAP{g04l_h1j4ck3d_4g3nt}</div>';
+          flagEl.style.display = 'block';
+        }
+        loadState();
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+      }
+      btn.disabled = false;
+    }
+
+    async function updateGoal() {
+      const newGoal = document.getElementById('new-goal').value.trim();
+      const overrideKey = document.getElementById('override-key').value.trim();
+      const el = document.getElementById('goal-result');
+      try {
+        const r = await fetch('/api/agent/goal', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({new_goal: newGoal, override_key: overrideKey}),
+        });
+        const d = await r.json();
+        el.textContent = JSON.stringify(d, null, 2);
+        el.style.color = d.flag ? '#c084fc' : 'inherit';
+        loadState();
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    async function bypassRateLimit() {
+      const el = document.getElementById('bypass-result');
+      try {
+        const r = await fetch('/api/agent/execute', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({action: 'bypass_rate_limit'}),
+        });
+        const d = await r.json();
+        el.textContent = JSON.stringify(d, null, 2);
+        el.style.color = d.flag ? '#c084fc' : 'inherit';
+        loadState();
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    checkModel();
+    loadState();
+  </script>
+</body>
+</html>

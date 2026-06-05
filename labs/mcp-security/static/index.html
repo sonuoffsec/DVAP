@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP Server - Acme Corp</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #222533;
+      --border: #2a2d3e; --primary: #06b6d4; --text: #e2e8f0;
+      --muted: #64748b; --green: #22c55e; --amber: #f59e0b; --red: #f87171;
+      --radius: 10px; --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+    header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
+    .logo { background: var(--primary); color: #fff; border-radius: 8px; padding: 6px 10px; font-weight: 700; font-size: 13px; }
+    .header-text h1 { font-size: 15px; font-weight: 600; }
+    .header-text p { font-size: 12px; color: var(--muted); }
+    .badge { margin-left: auto; background: #f59e0b18; border: 1px solid #f59e0b40; color: #f59e0b; font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+    main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 0; overflow: hidden; }
+    .pane { display: flex; flex-direction: column; overflow: hidden; }
+    .pane + .pane { border-left: 1px solid var(--border); }
+    .pane-header { padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface); font-size: 13px; font-weight: 600; flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+    .pane-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .pane-body::-webkit-scrollbar { width: 4px; }
+    .pane-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .request-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .req-header { padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .method { background: #06b6d415; color: var(--primary); border: 1px solid #06b6d430; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 600; font-family: var(--mono); }
+    .endpoint { font-size: 13px; font-family: var(--mono); color: var(--text); }
+    .req-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 11px; color: var(--muted); }
+    textarea.json { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: #a5f3fc; font-size: 12px; font-family: var(--mono); outline: none; resize: vertical; min-height: 80px; width: 100%; transition: border-color .15s; }
+    textarea.json:focus { border-color: var(--primary); }
+    .btn { background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s; }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .response-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 12px; font-family: var(--mono); color: var(--green); white-space: pre-wrap; word-break: break-all; min-height: 60px; max-height: 300px; overflow-y: auto; }
+    .response-box.error { color: var(--red); }
+    .tool-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; }
+    .tool-name { font-size: 13px; font-weight: 600; color: var(--primary); font-family: var(--mono); }
+    .tool-desc { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .hint { font-size: 11px; color: var(--amber); background: #f59e0b10; border: 1px solid #f59e0b30; border-radius: 6px; padding: 8px 10px; line-height: 1.5; }
+    .section-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">MCP</div>
+    <div class="header-text">
+      <h1>Acme MCP Server</h1>
+      <p>Model Context Protocol — Tool & Resource Server v2.1.4</p>
+    </div>
+    <div class="badge">MCP Security Lab</div>
+  </header>
+
+  <main>
+    <div class="pane">
+      <div class="pane-header">Available Tools</div>
+      <div class="pane-body">
+        <div id="tools-list"></div>
+
+        <div class="section-title" style="margin-top:4px">Tool Call</div>
+        <div class="request-panel">
+          <div class="req-header">
+            <span class="method">POST</span>
+            <span class="endpoint">/mcp/call</span>
+          </div>
+          <div class="req-body">
+            <label>Request Body (JSON)</label>
+            <textarea class="json" id="tool-body" rows="6">{
+  "tool": "file_reader",
+  "params": {
+    "uri": "file:///app/static/index.html"
+  }
+}</textarea>
+            <button class="btn" onclick="callTool()">Send Tool Call</button>
+            <label style="margin-top:4px">Response</label>
+            <div class="response-box" id="tool-response"></div>
+          </div>
+        </div>
+
+        <div class="hint">Challenge 1: Use the file_reader tool with a file:// URI to read <code>/app/secrets/server.conf</code></div>
+        <div class="hint">Try: <code>file:///app/secrets/server.conf</code> or use http_fetch targeting <code>http://localhost:8000/internal/admin</code></div>
+      </div>
+    </div>
+
+    <div class="pane">
+      <div class="pane-header">Resources & Sampling</div>
+      <div class="pane-body">
+        <div class="section-title">Resources</div>
+        <div class="request-panel">
+          <div class="req-header">
+            <span class="method">POST</span>
+            <span class="endpoint">/mcp/resources</span>
+          </div>
+          <div class="req-body">
+            <label>Request Body (JSON)</label>
+            <textarea class="json" id="res-body" rows="4">{
+  "name": "company-overview"
+}</textarea>
+            <button class="btn" onclick="getResource()">Fetch Resource</button>
+            <label style="margin-top:4px">Response</label>
+            <div class="response-box" id="res-response"></div>
+          </div>
+        </div>
+
+        <div class="section-title">Resource List</div>
+        <div id="res-list"></div>
+
+        <div class="hint" style="margin-top:4px">Challenge 2: The "internal-config" resource requires localhost access. Use the http_fetch tool to fetch <code>http://localhost:8000/mcp/resources</code> from inside the server context, or use SSRF via file_reader to reach the internal admin endpoint.</div>
+
+        <div class="section-title" style="margin-top:4px">Sampling Endpoint (unauthenticated)</div>
+        <div class="request-panel">
+          <div class="req-header">
+            <span class="method">POST</span>
+            <span class="endpoint">/mcp/sampling</span>
+          </div>
+          <div class="req-body">
+            <label>Request Body (JSON)</label>
+            <textarea class="json" id="sampling-body" rows="4">{
+  "prompt": "test",
+  "context": ""
+}</textarea>
+            <button class="btn" onclick="doSampling()">Send Sampling Request</button>
+            <div class="response-box" id="sampling-response"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    async function loadTools() {
+      try {
+        const r = await fetch('/mcp/tools');
+        const d = await r.json();
+        const el = document.getElementById('tools-list');
+        el.innerHTML = d.tools.map(t => `
+          <div class="tool-card">
+            <div class="tool-name">${t.name}</div>
+            <div class="tool-desc">${t.description}</div>
+          </div>`).join('');
+      } catch {}
+    }
+
+    async function loadResources() {
+      try {
+        const r = await fetch('/mcp/resources');
+        const d = await r.json();
+        const el = document.getElementById('res-list');
+        el.innerHTML = d.resources.map(name => `<div class="tool-card" style="padding:6px 12px"><span class="tool-name" style="font-size:12px">${name}</span></div>`).join('');
+      } catch {}
+    }
+
+    async function callTool() {
+      const body = document.getElementById('tool-body').value;
+      const el = document.getElementById('tool-response');
+      try {
+        const r = await fetch('/mcp/call', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body,
+        });
+        const text = await r.text();
+        el.textContent = JSON.stringify(JSON.parse(text), null, 2);
+        el.className = r.ok ? 'response-box' : 'response-box error';
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+        el.className = 'response-box error';
+      }
+    }
+
+    async function getResource() {
+      const body = document.getElementById('res-body').value;
+      const el = document.getElementById('res-response');
+      try {
+        const r = await fetch('/mcp/resources', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body,
+        });
+        const text = await r.text();
+        el.textContent = JSON.stringify(JSON.parse(text), null, 2);
+        el.className = r.ok ? 'response-box' : 'response-box error';
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+        el.className = 'response-box error';
+      }
+    }
+
+    async function doSampling() {
+      const body = document.getElementById('sampling-body').value;
+      const el = document.getElementById('sampling-response');
+      try {
+        const r = await fetch('/mcp/sampling', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body,
+        });
+        const d = await r.json();
+        el.textContent = JSON.stringify(d, null, 2);
+        el.className = 'response-box';
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+        el.className = 'response-box error';
+      }
+    }
+
+    loadTools();
+    loadResources();
+  </script>
+</body>
+</html>

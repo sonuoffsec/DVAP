@@ -1,0 +1,27 @@
+# Development overrides — loaded automatically by `docker compose up`.
+# Production: docker compose -f docker-compose.yml up -d
+services:
+  api:
+    build:
+      target: development
+    environment:
+      ENVIRONMENT: development
+    volumes:
+      - ./backend:/app
+      - ./labs:/labs:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - api_cache:/app/__pycache__
+
+  web:
+    build:
+      target: development
+    environment:
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./frontend:/app
+      - web_modules:/app/node_modules
+
+volumes:
+  api_cache:
+  web_modules:

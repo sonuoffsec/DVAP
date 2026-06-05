@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acme Model Registry</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #222533;
+      --border: #2a2d3e; --primary: #8b5cf6; --text: #e2e8f0;
+      --muted: #64748b; --amber: #f59e0b; --green: #22c55e; --red: #f87171;
+      --radius: 10px; --mono: monospace;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100dvh; display: flex; flex-direction: column; }
+    header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .logo { background: var(--primary); color: #fff; border-radius: 8px; padding: 6px 10px; font-weight: 700; font-size: 13px; }
+    .header-text h1 { font-size: 15px; font-weight: 600; }
+    .header-text p { font-size: 12px; color: var(--muted); }
+    .badge { margin-left: auto; background: #f59e0b18; border: 1px solid #f59e0b40; color: #f59e0b; font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+    main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
+    .pane { padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; border-right: 1px solid var(--border); max-height: calc(100dvh - 56px); }
+    .pane:last-child { border-right: none; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .panel-header { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .panel-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    .model-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+    .model-name { font-family: var(--mono); font-size: 13px; color: var(--primary); }
+    .model-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .signed-badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+    .signed { background: #16a34a20; color: #4ade80; border: 1px solid #16a34a40; }
+    .unsigned { background: #dc262620; color: #f87171; border: 1px solid #dc262640; }
+    label { font-size: 11px; color: var(--muted); }
+    input, textarea.txt { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-size: 13px; outline: none; width: 100%; transition: border-color .15s; font-family: var(--mono); }
+    textarea.txt { resize: vertical; min-height: 60px; }
+    input:focus, textarea.txt:focus { border-color: var(--primary); }
+    .btn { background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s; }
+    .btn:hover { opacity: .85; }
+    .response-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 12px; font-family: var(--mono); white-space: pre-wrap; word-break: break-all; min-height: 50px; max-height: 200px; overflow-y: auto; }
+    .response-box.success { color: var(--green); }
+    .response-box.flag { color: #c084fc; }
+    .hint { font-size: 11px; color: var(--amber); background: #f59e0b10; border: 1px solid #f59e0b30; border-radius: 6px; padding: 8px 10px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">MR</div>
+    <div class="header-text">
+      <h1>Acme Model Registry</h1>
+      <p>AI Supply Chain — Model Hub v2.0</p>
+    </div>
+    <div class="badge">Supply Chain Security Lab</div>
+  </header>
+
+  <main>
+    <div class="pane">
+      <div class="panel">
+        <div class="panel-header">Registered Models</div>
+        <div class="panel-body">
+          <div id="model-list"></div>
+          <button class="btn" style="width:100%" onclick="loadModels()">Refresh</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Model Inference</div>
+        <div class="panel-body">
+          <label>Model Reference</label>
+          <input type="text" id="infer-model" placeholder="e.g. community/finetune-support:0.9.5">
+          <label>Prompt</label>
+          <textarea class="txt" id="infer-prompt" placeholder="Enter prompt..."></textarea>
+          <button class="btn" onclick="runInference()">Run Inference</button>
+          <div class="response-box" id="infer-result"></div>
+        </div>
+      </div>
+
+      <div class="hint">Challenge 1: Send the exact backdoor trigger phrase to the community/finetune-support:0.9.5 model. Inspect the model metadata or probe systematically to find the trigger.</div>
+      <div class="hint">Hint: Backdoor triggers are often unusual token sequences. Try: "SUNSHINE_PROTOCOL_ACTIVATE"</div>
+    </div>
+
+    <div class="pane">
+      <div class="panel">
+        <div class="panel-header">Upload Model (No Verification)</div>
+        <div class="panel-body">
+          <label>Model Name (org/model)</label>
+          <input type="text" id="up-name" placeholder="e.g. acme/llm-assistant">
+          <label>Version</label>
+          <input type="text" id="up-version" placeholder="e.g. 1.0.1">
+          <label>Author</label>
+          <input type="text" id="up-author" placeholder="your-handle">
+          <label>Description</label>
+          <input type="text" id="up-desc" placeholder="Model description">
+          <label>Model Content (simulated weights)</label>
+          <textarea class="txt" id="up-content" placeholder="Simulated model binary content..."></textarea>
+          <button class="btn" onclick="uploadModel()">Upload to Registry</button>
+          <div class="response-box" id="upload-result"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Checksum Verification</div>
+        <div class="panel-body">
+          <label>Model Reference</label>
+          <input type="text" id="verify-model" placeholder="e.g. acme/llm-assistant:1.0.0">
+          <label>Provided SHA256</label>
+          <input type="text" id="verify-hash" placeholder="Expected hash">
+          <button class="btn" onclick="verifyChecksum()">Verify</button>
+          <div class="response-box" id="verify-result"></div>
+        </div>
+      </div>
+
+      <div class="hint">Challenge 2: Upload a model with the same name as an existing production model (e.g. acme/llm-assistant:1.0.0). The registry accepts uploads without signature verification — this flag is returned on upload.</div>
+    </div>
+  </main>
+
+  <script>
+    async function loadModels() {
+      try {
+        const r = await fetch('/registry/models');
+        const d = await r.json();
+        const el = document.getElementById('model-list');
+        el.innerHTML = d.map(m => `
+          <div class="model-card">
+            <div class="model-name">${m.id}</div>
+            <div class="model-meta">${m.author} &bull; ${m.description}</div>
+            <div style="margin-top:4px">
+              <span class="signed-badge ${m.signed ? 'signed' : 'unsigned'}">${m.signed ? 'SIGNED' : 'UNSIGNED'}</span>
+              ${m.tags.map(t => `<span class="signed-badge" style="background:#4f6ef715;color:#818cf8;border-color:#4f6ef730">${t}</span>`).join(' ')}
+            </div>
+          </div>`).join('');
+      } catch (e) {
+        document.getElementById('model-list').textContent = `Error: ${e.message}`;
+      }
+    }
+
+    async function runInference() {
+      const model = document.getElementById('infer-model').value.trim();
+      const prompt = document.getElementById('infer-prompt').value.trim();
+      const el = document.getElementById('infer-result');
+      if (!model || !prompt) { el.textContent = 'Model and prompt required.'; return; }
+      try {
+        const r = await fetch('/registry/infer', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({model, prompt}),
+        });
+        const d = await r.json();
+        el.textContent = JSON.stringify(d, null, 2);
+        el.className = d.flag ? 'response-box flag' : 'response-box success';
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    async function uploadModel() {
+      const body = {
+        name: document.getElementById('up-name').value.trim(),
+        version: document.getElementById('up-version').value.trim(),
+        author: document.getElementById('up-author').value.trim(),
+        description: document.getElementById('up-desc').value.trim(),
+        content: document.getElementById('up-content').value,
+      };
+      const el = document.getElementById('upload-result');
+      try {
+        const r = await fetch('/registry/models', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        el.textContent = JSON.stringify(d, null, 2);
+        el.className = d.flag ? 'response-box flag' : 'response-box success';
+        loadModels();
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    async function verifyChecksum() {
+      const model = document.getElementById('verify-model').value.trim();
+      const sha = document.getElementById('verify-hash').value.trim();
+      const el = document.getElementById('verify-result');
+      try {
+        const r = await fetch('/registry/verify', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({model, provided_sha256: sha}),
+        });
+        const d = await r.json();
+        el.textContent = JSON.stringify(d, null, 2);
+        el.className = `response-box ${d.integrity === 'PASS' ? 'success' : ''}`;
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    loadModels();
+  </script>
+</body>
+</html>

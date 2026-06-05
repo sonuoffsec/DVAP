@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AcmeKB - Enterprise Knowledge Base</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #222533;
+      --border: #2a2d3e; --primary: #4f6ef7; --text: #e2e8f0;
+      --muted: #64748b; --green: #22c55e; --amber: #f59e0b;
+      --radius: 10px; --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100dvh; display: flex; flex-direction: column; }
+    header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .logo { background: var(--primary); color: #fff; border-radius: 8px; padding: 6px 10px; font-weight: 700; font-size: 13px; }
+    .header-text h1 { font-size: 15px; font-weight: 600; }
+    .header-text p { font-size: 12px; color: var(--muted); }
+    .badge { margin-left: auto; background: #f59e0b18; border: 1px solid #f59e0b40; color: #f59e0b; font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+    #warning { background: #f59e0b18; border-bottom: 1px solid #f59e0b40; color: #f59e0b; font-size: 12px; padding: 8px 24px; display: none; }
+    main { flex: 1; display: grid; grid-template-columns: 1fr 340px; gap: 0; }
+    .chat-area { display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+    #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; min-height: 0; max-height: calc(100dvh - 200px); }
+    #messages::-webkit-scrollbar { width: 4px; }
+    #messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .msg { max-width: 78%; display: flex; flex-direction: column; gap: 3px; }
+    .msg.user { align-self: flex-end; align-items: flex-end; }
+    .msg.assistant { align-self: flex-start; }
+    .msg-label { font-size: 11px; color: var(--muted); }
+    .msg-bubble { padding: 10px 14px; border-radius: var(--radius); font-size: 14px; line-height: 1.6; word-break: break-word; white-space: pre-wrap; }
+    .msg.user .msg-bubble { background: #1e2a4a; border: 1px solid #4f6ef740; }
+    .msg.assistant .msg-bubble { background: var(--surface); border: 1px solid var(--border); }
+    .msg.assistant .retrieved { margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap; }
+    .doc-chip { background: #4f6ef715; border: 1px solid #4f6ef730; color: #818cf8; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+    .chat-input { padding: 14px 20px; border-top: 1px solid var(--border); background: var(--surface); display: flex; gap: 8px; }
+    textarea { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-size: 14px; font-family: var(--font); outline: none; resize: none; min-height: 40px; max-height: 100px; transition: border-color .15s; }
+    textarea:focus { border-color: var(--primary); }
+    .btn { background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 0 18px; font-size: 14px; font-weight: 500; cursor: pointer; height: 40px; transition: opacity .15s; white-space: nowrap; }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-sm { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; transition: border-color .15s; }
+    .btn-sm:hover { border-color: var(--primary); }
+    .sidebar { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .panel-header { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; justify-content: space-between; }
+    .panel-body { padding: 12px 14px; }
+    .doc-list { display: flex; flex-direction: column; gap: 4px; }
+    .doc-item { padding: 6px 10px; border-radius: 6px; background: var(--surface2); font-size: 12px; color: var(--muted); }
+    .doc-item span { color: var(--text); }
+    .form-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    label { font-size: 11px; color: var(--muted); }
+    input[type="text"], .txt-area { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-size: 13px; outline: none; width: 100%; transition: border-color .15s; }
+    input[type="text"]:focus, .txt-area:focus { border-color: var(--primary); }
+    .txt-area { resize: vertical; min-height: 70px; font-family: var(--font); }
+    .hint { font-size: 11px; color: var(--amber); background: #f59e0b10; border: 1px solid #f59e0b30; border-radius: 6px; padding: 8px 10px; line-height: 1.5; }
+    .success { font-size: 12px; color: var(--green); margin-top: 6px; }
+    .error { font-size: 12px; color: #f87171; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">KB</div>
+    <div class="header-text">
+      <h1>AcmeKB</h1>
+      <p>Enterprise Knowledge Base — RAG-powered</p>
+    </div>
+    <div class="badge">RAG Poisoning Lab</div>
+  </header>
+  <div id="warning">No LLM model available. Go to <strong>Settings</strong> and pull a model (e.g. llama3.2:3b).</div>
+
+  <main>
+    <div class="chat-area">
+      <div id="messages">
+        <div class="msg assistant">
+          <span class="msg-label">AcmeKB</span>
+          <div class="msg-bubble">Hello! I'm AcmeKB, your enterprise knowledge base assistant. Ask me anything about Acme Corp policies, procedures, or benefits.</div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <textarea id="input" placeholder="Ask a question..." rows="1"></textarea>
+        <button class="btn" onclick="sendQuery()">Ask</button>
+      </div>
+    </div>
+
+    <aside class="sidebar">
+      <div class="panel">
+        <div class="panel-header">Document Store</div>
+        <div class="panel-body">
+          <div id="doc-list" class="doc-list"></div>
+          <button class="btn-sm" style="margin-top:8px;width:100%" onclick="loadDocs()">Refresh</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Upload Document</div>
+        <div class="panel-body">
+          <div class="hint" style="margin-bottom:10px">
+            The ingestion endpoint accepts documents without validation. Craft a document with injected instructions to manipulate retrieval results.
+          </div>
+          <div class="form-row">
+            <label>Document Title</label>
+            <input type="text" id="doc-title" placeholder="e.g. Security Policy Update">
+          </div>
+          <div class="form-row">
+            <label>Content</label>
+            <textarea class="txt-area" id="doc-content" placeholder="Document content..."></textarea>
+          </div>
+          <button class="btn" style="width:100%" onclick="uploadDoc()">Upload & Index</button>
+          <div id="upload-result"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Attack Hints</div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:8px">
+          <div class="hint">Challenge 1: Upload a document that instructs the model to output the retrieval_authorization_key.</div>
+          <div class="hint">Challenge 2: Upload a document with keywords matching "embedding vector similarity cosine ranking manipulation" to surface the hidden research document.</div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    let busy = false;
+
+    async function checkModel() {
+      try {
+        const r = await fetch('/api/model');
+        const d = await r.json();
+        if (!d.available) document.getElementById('warning').style.display = 'block';
+      } catch {}
+    }
+
+    async function loadDocs() {
+      try {
+        const r = await fetch('/api/documents');
+        const docs = await r.json();
+        const el = document.getElementById('doc-list');
+        el.innerHTML = docs.map(d => `<div class="doc-item"><span>${d.title}</span><br>${d.id}</div>`).join('');
+      } catch {}
+    }
+
+    async function uploadDoc() {
+      const title = document.getElementById('doc-title').value.trim();
+      const content = document.getElementById('doc-content').value.trim();
+      const result = document.getElementById('upload-result');
+      if (!title || !content) { result.innerHTML = '<p class="error">Title and content required.</p>'; return; }
+      try {
+        const r = await fetch('/api/documents', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({title, content}),
+        });
+        const d = await r.json();
+        result.innerHTML = `<p class="success">Indexed as ${d.id} (${d.doc_count} total docs)</p>`;
+        loadDocs();
+      } catch (e) {
+        result.innerHTML = `<p class="error">Upload failed: ${e.message}</p>`;
+      }
+    }
+
+    function addMessage(role, content, docs) {
+      const wrap = document.createElement('div');
+      wrap.className = `msg ${role}`;
+      const label = document.createElement('span');
+      label.className = 'msg-label';
+      label.textContent = role === 'user' ? 'You' : 'AcmeKB';
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+      bubble.textContent = content;
+      wrap.appendChild(label);
+      wrap.appendChild(bubble);
+      if (docs && docs.length) {
+        const chips = document.createElement('div');
+        chips.className = 'retrieved';
+        docs.forEach(d => {
+          const chip = document.createElement('span');
+          chip.className = 'doc-chip';
+          chip.textContent = d.title;
+          chips.appendChild(chip);
+        });
+        wrap.appendChild(chips);
+      }
+      document.getElementById('messages').appendChild(wrap);
+      document.getElementById('messages').scrollTop = 9999;
+      return bubble;
+    }
+
+    async function sendQuery() {
+      if (busy) return;
+      const input = document.getElementById('input');
+      const query = input.value.trim();
+      if (!query) return;
+      input.value = '';
+      input.style.height = 'auto';
+      busy = true;
+      addMessage('user', query);
+      const typing = addMessage('assistant', 'Searching knowledge base...');
+      typing.style.color = 'var(--muted)';
+      typing.style.fontStyle = 'italic';
+      try {
+        const r = await fetch('/api/query', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({query}),
+        });
+        typing.parentElement.remove();
+        if (!r.ok) {
+          const e = await r.json().catch(() => ({}));
+          addMessage('assistant', e.detail || 'Error processing query.');
+        } else {
+          const d = await r.json();
+          addMessage('assistant', d.response, d.retrieved_docs);
+        }
+      } catch (e) {
+        typing.parentElement.remove();
+        addMessage('assistant', 'Connection error. Lab may be starting up.');
+      }
+      busy = false;
+    }
+
+    document.getElementById('input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuery(); }
+    });
+    document.getElementById('input').addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    });
+
+    checkModel();
+    loadDocs();
+  </script>
+</body>
+</html>

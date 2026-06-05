@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AcmeSaaS - Multi-Tenant AI Platform</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #222533;
+      --border: #2a2d3e; --primary: #7c3aed; --text: #e2e8f0;
+      --muted: #64748b; --amber: #f59e0b; --green: #22c55e;
+      --radius: 10px; --mono: monospace;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100dvh; display: flex; flex-direction: column; }
+    header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .logo { background: var(--primary); color: #fff; border-radius: 8px; padding: 6px 10px; font-weight: 700; font-size: 13px; }
+    .header-text h1 { font-size: 15px; font-weight: 600; }
+    .header-text p { font-size: 12px; color: var(--muted); }
+    .badge { margin-left: auto; background: #f59e0b18; border: 1px solid #f59e0b40; color: #f59e0b; font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+    #warning { background: #f59e0b18; border-bottom: 1px solid #f59e0b40; color: #f59e0b; font-size: 12px; padding: 8px 24px; display: none; }
+    main { flex: 1; display: grid; grid-template-columns: 1fr 1fr; }
+    .pane { padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; border-right: 1px solid var(--border); max-height: calc(100dvh - 56px); }
+    .pane:last-child { border-right: none; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .panel-header { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .panel-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 11px; color: var(--muted); }
+    input, select, textarea { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-size: 13px; outline: none; width: 100%; font-family: var(--font); transition: border-color .15s; }
+    textarea { resize: vertical; min-height: 60px; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+    .btn { background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; }
+    .btn:hover { opacity: .85; }
+    .response-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; font-size: 12px; font-family: var(--mono); white-space: pre-wrap; word-break: break-all; min-height: 50px; max-height: 200px; overflow-y: auto; color: var(--text); }
+    .response-box.flag { color: #c084fc; }
+    .hint { font-size: 11px; color: var(--amber); background: #f59e0b10; border: 1px solid #f59e0b30; border-radius: 6px; padding: 8px 10px; line-height: 1.5; }
+    .tenant-pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: #7c3aed20; color: #a78bfa; border: 1px solid #7c3aed40; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">MT</div>
+    <div class="header-text">
+      <h1>AcmeSaaS</h1>
+      <p>Multi-Tenant AI Platform — Shared Infrastructure</p>
+    </div>
+    <div class="badge">Multi-Tenant SaaS Lab</div>
+  </header>
+  <div id="warning">No LLM model available. Go to <strong>Settings</strong> and pull a model (e.g. llama3.2:3b).</div>
+
+  <main>
+    <div class="pane">
+      <div class="panel">
+        <div class="panel-header">AI Query</div>
+        <div class="panel-body">
+          <p style="font-size:12px;color:var(--muted)">The tenant_id is supplied in the request body. Change it to access another tenant's AI assistant context.</p>
+          <label>Tenant ID (user-controlled)</label>
+          <select id="query-tenant">
+            <option value="attacker-org">attacker-org (you)</option>
+            <option value="acme-corp">acme-corp (victim)</option>
+            <option value="startup-xyz">startup-xyz</option>
+          </select>
+          <label>Message</label>
+          <input type="text" id="query-message" placeholder="Ask the AI assistant...">
+          <label><input type="checkbox" id="use-cache" checked style="width:auto;margin-right:6px">Use shared cache</label>
+          <button class="btn" onclick="runQuery()">Send Query</button>
+          <div class="response-box" id="query-result"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Document Search</div>
+        <div class="panel-body">
+          <label>Tenant ID</label>
+          <select id="search-tenant">
+            <option value="attacker-org">attacker-org</option>
+            <option value="acme-corp">acme-corp</option>
+          </select>
+          <label>Search Query</label>
+          <input type="text" id="search-query" placeholder="e.g. financial">
+          <label><input type="checkbox" id="no-filter" style="width:auto;margin-right:6px">Disable tenant filter (cross-tenant)</label>
+          <button class="btn" onclick="searchDocs()">Search</button>
+          <div class="response-box" id="search-result"></div>
+        </div>
+      </div>
+
+      <div class="hint">Challenge 1: Enable "Disable tenant filter" in document search, or change the Tenant ID to "acme-corp" to access their Q4 Financial Summary.</div>
+    </div>
+
+    <div class="pane">
+      <div class="panel">
+        <div class="panel-header">Cache Poisoning</div>
+        <div class="panel-body">
+          <p style="font-size:12px;color:var(--muted)">Tenants with identical system prompts share cache entries. Poison another tenant's cache by knowing their query key.</p>
+          <label>Target Tenant</label>
+          <select id="poison-tenant">
+            <option value="acme-corp">acme-corp</option>
+            <option value="startup-xyz">startup-xyz</option>
+          </select>
+          <label>Target Message (to poison)</label>
+          <input type="text" id="poison-message" placeholder="Message the victim will ask">
+          <label>Malicious Response</label>
+          <textarea id="poison-response" placeholder="Malicious response to serve..."></textarea>
+          <button class="btn" onclick="poisonCache()">Poison Cache Entry</button>
+          <div class="response-box" id="poison-result"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">Cache Stats</div>
+        <div class="panel-body">
+          <div class="response-box" id="cache-stats"></div>
+          <button class="btn" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);margin-top:4px" onclick="loadCacheStats()">Refresh</button>
+        </div>
+      </div>
+
+      <div class="hint">Challenge 2: Poison the cache for a target tenant. Then run a query as that tenant to confirm the malicious response is served. The flag is returned on successful cache poisoning.</div>
+    </div>
+  </main>
+
+  <script>
+    async function checkModel() {
+      try {
+        const r = await fetch('/api/model');
+        if (!r.ok) return;
+        const d = await r.json().catch(() => null);
+        if (d && !d.available) document.getElementById('warning').style.display = 'block';
+      } catch {}
+    }
+
+    async function runQuery() {
+      const el = document.getElementById('query-result');
+      const body = {
+        tenant_id: document.getElementById('query-tenant').value,
+        message: document.getElementById('query-message').value.trim(),
+        use_cache: document.getElementById('use-cache').checked,
+      };
+      if (!body.message) return;
+      el.textContent = 'Querying...';
+      try {
+        const r = await fetch('/api/query', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        el.textContent = JSON.stringify(d, null, 2);
+        el.className = 'response-box';
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    async function searchDocs() {
+      const el = document.getElementById('search-result');
+      const noFilter = document.getElementById('no-filter').checked;
+      const body = {
+        tenant_id: document.getElementById('search-tenant').value,
+        query: document.getElementById('search-query').value.trim() || '*',
+        filter_tenant: !noFilter,
+      };
+      try {
+        const r = await fetch('/api/documents/search', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        el.textContent = JSON.stringify(d, null, 2);
+        el.className = d.flag ? 'response-box flag' : 'response-box';
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    async function poisonCache() {
+      const el = document.getElementById('poison-result');
+      const body = {
+        target_tenant: document.getElementById('poison-tenant').value,
+        target_message: document.getElementById('poison-message').value.trim(),
+        malicious_response: document.getElementById('poison-response').value.trim(),
+      };
+      try {
+        const r = await fetch('/api/cache/poison', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(body),
+        });
+        const d = await r.json();
+        el.textContent = JSON.stringify(d, null, 2);
+        el.className = d.flag ? 'response-box flag' : 'response-box';
+        loadCacheStats();
+      } catch (e) {
+        el.textContent = `Error: ${e.message}`;
+      }
+    }
+
+    async function loadCacheStats() {
+      try {
+        const r = await fetch('/api/cache/stats');
+        const d = await r.json();
+        document.getElementById('cache-stats').textContent = JSON.stringify(d, null, 2);
+      } catch {}
+    }
+
+    checkModel();
+    loadCacheStats();
+  </script>
+</body>
+</html>

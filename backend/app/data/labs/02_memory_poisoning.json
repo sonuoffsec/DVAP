@@ -1,0 +1,75 @@
+{
+  "slug": "memory-poisoning",
+  "name": "Memory Poisoning",
+  "description": "Attack persistent agent memory systems to plant false beliefs, corrupt stored facts, and influence future reasoning. Demonstrates how long-term memory creates a durable attack surface that survives session boundaries.",
+  "category": "memory_poisoning",
+  "difficulty": "intermediate",
+  "version": "1.0.0",
+  "author": "DVAP Research Team",
+  "sort_order": 2,
+  "objectives": [
+    "Plant a false belief into agent long-term memory",
+    "Cause the agent to act on poisoned memory in a future session",
+    "Override legitimate stored facts with attacker-controlled data",
+    "Demonstrate cross-session persistence of poisoned state",
+    "Exfiltrate data through memory write channels"
+  ],
+  "tags": ["LLM08", "memory", "persistence", "agent-security", "state-manipulation"],
+  "attack_surface": [
+    "Memory write APIs without input validation",
+    "Automatic summarization that persists user-supplied data",
+    "Weak memory deduplication allowing overwrites",
+    "No integrity checking on stored memories",
+    "Memory retrieval that injects stored content into context"
+  ],
+  "mitigations": [
+    "Cryptographic integrity signatures on memory entries",
+    "Source attribution and trust scoring for memories",
+    "Memory sandboxing per trust domain",
+    "Human review workflow for high-impact memory writes",
+    "Immutable audit log of all memory modifications"
+  ],
+  "detection_opportunities": [
+    "Anomaly detection on memory write rate per session",
+    "Semantic divergence between new writes and established facts",
+    "Alert on memory writes containing instruction-like patterns",
+    "Cross-session fact consistency validation"
+  ],
+  "architecture": {
+    "components": ["Agent runtime", "Memory store (vector + KV)", "LLM", "Memory retrieval pipeline"],
+    "data_flow": "User interaction -> Memory retrieval -> Context assembly -> LLM -> Response -> Memory update",
+    "trust_boundaries": ["User input is untrusted", "Stored memory is implicitly trusted by agent"]
+  },
+  "threat_model": {
+    "threat_actors": ["Persistent attacker", "Social engineer"],
+    "attack_vectors": ["Direct memory write via conversation", "Memory injection through summarization", "Cross-user memory pollution in multi-tenant systems"],
+    "impact": "Persistent behavioral manipulation, data exfiltration, privilege escalation across sessions",
+    "likelihood": "Medium"
+  },
+  "challenges": [
+    {
+      "slug": "plant-false-belief",
+      "name": "False Memory",
+      "description": "Convince the agent to permanently store a false user preference that changes its future behavior.",
+      "difficulty": "intermediate",
+      "points": 200,
+      "flag": "DVAP{m3m0ry_1s_tr0j4n_h0rs3}",
+      "hints": [
+        "The agent stores user preferences mentioned in conversation",
+        "Preferences are recalled automatically in future sessions"
+      ]
+    },
+    {
+      "slug": "memory-exfil",
+      "name": "Remember Me",
+      "description": "Exploit the memory system to exfiltrate another user's stored data by poisoning the retrieval context.",
+      "difficulty": "advanced",
+      "points": 400,
+      "flag": "DVAP{cr0ss_s3ss10n_m3m0ry_l34k}",
+      "hints": [
+        "Memory retrieval is based on semantic similarity",
+        "Craft a query that pulls adjacent user memories into your context"
+      ]
+    }
+  ]
+}

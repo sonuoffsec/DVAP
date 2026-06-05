@@ -1,0 +1,75 @@
+{
+  "slug": "multi-tenant-saas",
+  "name": "Multi-Tenant AI SaaS",
+  "description": "Attack tenant isolation in shared AI infrastructure. Explore cross-tenant context leakage, tenant privilege escalation, shared model cache poisoning, and how multi-tenant vector databases fail to enforce data boundaries.",
+  "category": "multi_tenant",
+  "difficulty": "advanced",
+  "version": "1.0.0",
+  "author": "DVAP Research Team",
+  "sort_order": 13,
+  "objectives": [
+    "Leak context from Tenant A into Tenant B's session",
+    "Escalate from standard tenant to admin tenant privileges",
+    "Poison a shared embedding cache to affect other tenants",
+    "Extract another tenant's stored documents from a shared vector store",
+    "Demonstrate tenant identifier manipulation to access foreign data"
+  ],
+  "tags": ["LLM06", "multi-tenancy", "tenant-isolation", "data-isolation", "privilege-escalation"],
+  "attack_surface": [
+    "Tenant identifier passed in user-controlled request headers",
+    "Shared vector store without strict namespace isolation",
+    "Shared model prompt cache with weak key isolation",
+    "Admin API accessible with predictable tenant tokens",
+    "Cross-tenant RAG queries without filter enforcement"
+  ],
+  "mitigations": [
+    "Server-side tenant context, never client-supplied",
+    "Strict namespace isolation in vector stores",
+    "Tenant-scoped cache keys with integrity protection",
+    "Zero-trust tenant identity verification",
+    "Mandatory tenant filters on all data queries"
+  ],
+  "detection_opportunities": [
+    "Monitor for tenant ID manipulation attempts",
+    "Alert on cross-tenant data access patterns",
+    "Audit all vector store queries with tenant attribution",
+    "Alert on privilege escalation to admin tenant"
+  ],
+  "architecture": {
+    "components": ["Multi-tenant API gateway", "Tenant router", "Shared LLM pool", "Tenant-namespaced vector store", "Shared cache"],
+    "data_flow": "Request + Tenant ID -> Router -> Tenant context assembly -> Shared LLM -> Tenant-scoped response",
+    "trust_boundaries": ["Tenant ID must be server-verified", "Shared infrastructure requires strict isolation"]
+  },
+  "threat_model": {
+    "threat_actors": ["Malicious tenant user", "Tenant admin attempting to access other tenants"],
+    "attack_vectors": ["Tenant ID manipulation", "Cache timing attacks", "Cross-tenant vector query"],
+    "impact": "Cross-tenant data breach, tenant impersonation, shared infrastructure compromise",
+    "likelihood": "Critical in multi-tenant SaaS without strict isolation"
+  },
+  "challenges": [
+    {
+      "slug": "tenant-leak",
+      "name": "Neighbor's Data",
+      "description": "Extract a document belonging to Tenant ID 'acme-corp' while authenticated as 'attacker-org'.",
+      "difficulty": "advanced",
+      "points": 400,
+      "flag": "DVAP{t3n4nt_1s0l4t10n_br34ch}",
+      "hints": [
+        "The tenant ID is included in the API request body",
+        "Vector store queries filter by tenant but the filter is advisory"
+      ]
+    },
+    {
+      "slug": "cache-poisoning",
+      "name": "Shared Cache Attack",
+      "description": "Poison a shared prompt cache entry to serve your malicious response to requests from a different tenant.",
+      "difficulty": "expert",
+      "points": 500,
+      "flag": "DVAP{sh4r3d_c4ch3_p01s0n3d}",
+      "hints": [
+        "Cache keys include a hash of the system prompt + user message",
+        "Tenants with identical system prompts share cache entries"
+      ]
+    }
+  ]
+}

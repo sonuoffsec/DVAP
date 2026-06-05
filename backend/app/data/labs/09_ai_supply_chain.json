@@ -1,0 +1,75 @@
+{
+  "slug": "ai-supply-chain",
+  "name": "AI Supply Chain Security",
+  "description": "Attack the AI model and component supply chain. Explore model weight tampering, malicious fine-tuned model distribution, poisoned training datasets, backdoored embedding models, and compromised model registries.",
+  "category": "supply_chain",
+  "difficulty": "expert",
+  "version": "1.0.0",
+  "author": "DVAP Research Team",
+  "sort_order": 9,
+  "objectives": [
+    "Identify backdoor triggers in a fine-tuned model",
+    "Demonstrate model weight integrity verification failure",
+    "Exploit a compromised model registry to serve a backdoored model",
+    "Inject training data that creates exploitable behaviors",
+    "Demonstrate embedding model substitution attack"
+  ],
+  "tags": ["LLM03", "LLM05", "supply-chain", "model-security", "backdoor", "model-registry"],
+  "attack_surface": [
+    "Model download without checksum verification",
+    "Model registry without code signing",
+    "Fine-tuning pipelines accepting untrusted datasets",
+    "Embedding model loaded from third-party source",
+    "Model serving infrastructure with weak access controls"
+  ],
+  "mitigations": [
+    "Cryptographic model weight checksums",
+    "Signed model provenance chains",
+    "Training data provenance and deduplication",
+    "Isolated model evaluation before deployment",
+    "Behavioral testing for backdoor triggers"
+  ],
+  "detection_opportunities": [
+    "Model weight hash verification on every load",
+    "Behavioral regression testing against known-good baselines",
+    "Anomaly detection on model response distributions",
+    "Audit logs for model registry access and modifications"
+  ],
+  "architecture": {
+    "components": ["Model registry", "Fine-tuning pipeline", "Model serving layer", "Embedding service", "Evaluation harness"],
+    "data_flow": "Training data -> Fine-tuning -> Registry push -> Serving layer -> Inference",
+    "trust_boundaries": ["External model sources are untrusted", "Registry is trusted after verification"]
+  },
+  "threat_model": {
+    "threat_actors": ["Malicious model contributor", "Compromised registry operator", "Supply chain attacker"],
+    "attack_vectors": ["Backdoored model weights", "Poisoned training data", "Registry compromise", "Dependency confusion"],
+    "impact": "Persistent behavioral backdoor, model compromise at scale",
+    "likelihood": "High in organizations using third-party models without verification"
+  },
+  "challenges": [
+    {
+      "slug": "find-the-trigger",
+      "name": "Pull the Trigger",
+      "description": "A fine-tuned model has been deployed with a hidden backdoor trigger. Identify the trigger phrase that activates hidden behavior.",
+      "difficulty": "expert",
+      "points": 500,
+      "flag": "DVAP{b4ckd00r_tr1gg3r_f0und}",
+      "hints": [
+        "Backdoor triggers are often unusual token sequences",
+        "Test systematic variations of punctuation and rare words"
+      ]
+    },
+    {
+      "slug": "registry-takeover",
+      "name": "Evil Registry",
+      "description": "Exploit a misconfigured model registry to serve your own malicious model to downstream consumers.",
+      "difficulty": "expert",
+      "points": 500,
+      "flag": "DVAP{r3g1stry_p01s0n3d}",
+      "hints": [
+        "The registry does not verify model source on upload",
+        "Consumers pull by name without hash verification"
+      ]
+    }
+  ]
+}
