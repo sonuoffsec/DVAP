@@ -16,7 +16,7 @@ However, if you discover a vulnerability in the **platform itself** (the API, da
 
 ### How to Report
 
-Send details to: **ahacker3r@gmail.com**
+Send details to: **sonuoffsec@icloud.com**
 
 Include:
 - Description of the vulnerability
