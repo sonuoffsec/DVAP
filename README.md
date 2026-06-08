@@ -18,7 +18,7 @@ Runs 100% locally. No cloud, no paid APIs, no data leaves your machine.
 
 ## What is DVAP?
 
-DVAP is an open-source AI security research, training, benchmarking, and red teaming platform designed to help security professionals, AI engineers, researchers, students, and organizations understand how modern AI systems fail — and how to defend them.
+DVAP is an open-source AI security research, training, benchmarking, and red teaming platform designed to help security professionals, AI engineers, researchers, students, and organizations understand how modern AI systems fail - and how to defend them.
 
 Built for the AI era, DVAP provides intentionally vulnerable AI applications, agents, RAG systems, MCP integrations, and domain-specific environments that can be attacked, analyzed, benchmarked, and secured.
 
