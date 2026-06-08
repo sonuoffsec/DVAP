@@ -77,7 +77,8 @@ Run everything on your own machine. Your prompts, data, findings, and experiment
 
 ## Demo
 
-<video src="https://github.com/user-attachments/assets/24c84b1c-1eb2-4268-befe-08162f38e89f" controls width="100%"></video>
+<video src="https://github.com/user-attachments/assets/d7c920cc-7e4a-4599-94a6-ec8b481fb7bb
+" controls width="100%"></video>
 
 ---
 
