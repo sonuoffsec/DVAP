@@ -97,7 +97,7 @@ Run everything on your own machine. Your prompts, data, findings, and experiment
 
 ## Demo
 
-<video src="https://github.com/user-attachments/assets/24c84b1c-1eb2-4268-befe-08162f38e89f" controls width="100%"></video>
+[![Watch the demo](https://img.youtube.com/vi/-hzp43YpKIQ/maxresdefault.jpg)](https://youtu.be/-hzp43YpKIQ)
 
 ---
 
