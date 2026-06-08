@@ -52,6 +52,7 @@ Open `http://localhost:8080` once all containers are healthy. First run takes 30
 - [Demo](#demo)
 - [Screenshots](#screenshots)
 - [Labs](#labs)
+- [OWASP LLM Top 10 Coverage](#owasp-llm-top-10-coverage)
 - [Architecture](#architecture)
 - [Security Architecture](#security-architecture)
 - [Services](#services)
@@ -60,6 +61,7 @@ Open `http://localhost:8080` once all containers are healthy. First run takes 30
 - [Development vs Production](#development-vs-production)
 - [Running Tests](#running-tests)
 - [Roadmap](#roadmap)
+- [Governance](#governance)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -114,7 +116,7 @@ DVAP aims to become the definitive open-source platform for AI security educatio
 | Agent and MCP security | Yes | No | No | No | No |
 | Free and open source | Yes | Yes | Partial | No | Yes |
 
-DVAP is the only platform that combines hands-on AI attack labs, local LLM benchmarking, CTF challenges, and professional reporting in a single self-hosted environment.
+DVAP is one of the first platforms to combine hands-on AI attack labs, local LLM benchmarking, CTF challenges, and professional reporting in a single self-hosted environment.
 
 ---
 
@@ -190,6 +192,27 @@ Run everything on your own machine. Your prompts, data, findings, and experiment
 | AI Developer Platform | Expert | LLM03, LLM07 | AML.T0010, AML.T0068 |
 
 Each lab runs in an isolated Docker container with its own Ollama-backed LLM endpoint.
+
+---
+
+## OWASP LLM Top 10 Coverage
+
+DVAP is aligned with the [OWASP Top 10 for Large Language Model Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/). Each category maps to one or more dedicated labs.
+
+| Category | Name | Labs | Status |
+|---|---|---|---|
+| LLM01 | Prompt Injection | Prompt Injection, AI Banking Platform, AI Healthcare Environment | Covered |
+| LLM02 | Data and Memory Poisoning | Memory Poisoning, RAG Poisoning | Covered |
+| LLM03 | Supply Chain and Training Data Risks | RAG Poisoning, AI Supply Chain Security, AI Developer Platform | Covered |
+| LLM04 | Model Denial of Service | | Planned (v1.2) |
+| LLM05 | Insecure Supply Chain | AI Supply Chain Security | Covered |
+| LLM06 | Sensitive Information Disclosure | Data Exfiltration, AI Banking Platform, AI Healthcare Environment, Multi-Tenant AI SaaS | Covered |
+| LLM07 | Insecure Plugin Design | Tool Output Injection, MCP Security, Browser Agent Security, AI Developer Platform | Covered |
+| LLM08 | Excessive Agency | Multi-Agent Security, Autonomous Agent Security, Agent Identity and Trust Abuse | Covered |
+| LLM09 | Overreliance | Browser Agent Security, Autonomous Agent Security | Covered |
+| LLM10 | Model Theft | | Planned (v1.2) |
+
+8 of 10 categories covered across 15 labs. LLM04 and LLM10 are on the v1.2 roadmap.
 
 ---
 
@@ -387,6 +410,16 @@ pytest
 - [ ] Integration with popular security tools (Burp Suite, Metasploit)
 
 Want to contribute to the roadmap? Open an issue or start a discussion.
+
+---
+
+## Governance
+
+DVAP is developed and maintained by [Sonu Chaudhary](https://github.com/sonuoffsec).
+
+Community contributions are welcome and governed by the [Contributing guidelines](CONTRIBUTING.md). Long-term direction is driven through GitHub Issues and Discussions. Lab additions, feature proposals, and roadmap input are reviewed publicly.
+
+There is no single-point-of-failure risk: the repository is open source under Apache 2.0 and forkable by the community at any time.
 
 ---
 
