@@ -12,6 +12,7 @@ First off, thank you for taking the time to contribute. DVAP is an open-source p
 - [Adding Benchmark Suites](#adding-benchmark-suites)
 - [Code Style](#code-style)
 - [Pull Request Checklist](#pull-request-checklist)
+- [Developer Certificate of Origin](#developer-certificate-of-origin)
 - [Reporting Security Issues](#reporting-security-issues)
 - [Code of Conduct](#code-of-conduct)
 
@@ -145,7 +146,14 @@ cd frontend
 npm run lint
 ```
 
-**Commit messages:** Keep them short and descriptive. Start with a verb.
+**Commit messages:** Keep them short and descriptive. Start with a verb. Sign every commit with `-s` to satisfy the DCO requirement:
+```bash
+git commit -s -m "add multi-agent lab with trust boundary exploit"
+```
+
+This adds a `Signed-off-by` trailer to the commit, certifying the contribution is your original work or properly licensed. See [DCO](DCO) for the full text.
+
+Example messages:
 ```
 add multi-agent lab with trust boundary exploit
 fix benchmark score calculation for partial passes
@@ -165,6 +173,21 @@ Before submitting a PR, make sure:
 - [ ] Flags follow the format `DVAP{...}`
 - [ ] PR description explains what changed and why
 - [ ] If adding a new lab, it has been tested locally with at least one Ollama model
+- [ ] All commits are signed off (`git commit -s`)
+
+---
+
+## Developer Certificate of Origin
+
+All contributions must be signed off under the [Developer Certificate of Origin](DCO). This certifies that you wrote the code or have the right to submit it under the Apache 2.0 license.
+
+Sign off every commit with:
+
+```bash
+git commit -s -m "your commit message"
+```
+
+This appends `Signed-off-by: Your Name <your@email.com>` to the commit. PRs with unsigned commits will not be merged.
 
 ---
 
