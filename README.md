@@ -16,6 +16,17 @@ Runs 100% locally. No cloud, no paid APIs, no data leaves your machine.
 
 ---
 
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) 24+ and Docker Compose v2
+- 16 GB RAM minimum (Ollama loads models into memory; 8 GB works for small models only)
+- 20 GB free disk space for base images and at least one model
+- x86-64 CPU; Apple Silicon and ARM64 are supported but untested
+
+GPU is optional. Ollama runs on CPU but inference will be slow without one.
+
+---
+
 ## Quick Start
 
 ```bash
@@ -31,10 +42,13 @@ Open `http://localhost:8080` once all containers are healthy. First run takes 30
 
 ## Table of Contents
 
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
 - [What is DVAP?](#what-is-dvap)
 - [Why DVAP?](#why-dvap)
 - [How DVAP Differs](#how-dvap-differs)
 - [Key Features](#key-features)
+- [Platform Overview](#platform-overview)
 - [Demo](#demo)
 - [Screenshots](#screenshots)
 - [Labs](#labs)
@@ -125,6 +139,8 @@ Generate professional findings and benchmark reports mapped to OWASP LLM Top 10,
 Run everything on your own machine. Your prompts, data, findings, and experiments never leave your environment.
 
 ---
+
+## Platform Overview
 
 ![DVAP Platform Overview](docs/dvap-diagram.png)
 
