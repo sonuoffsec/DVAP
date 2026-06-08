@@ -16,9 +16,44 @@ Runs 100% locally. No cloud, no paid APIs, no data leaves your machine.
 
 ---
 
+## Quick Start
+
+```bash
+git clone https://github.com/sonuoffsec/DVAP
+cd DVAP
+cp .env.example .env
+docker compose up -d
+```
+
+Open `http://localhost:8080` once all containers are healthy. First run takes 30-60 seconds.
+
+---
+
+## Table of Contents
+
+- [What is DVAP?](#what-is-dvap)
+- [Why DVAP?](#why-dvap)
+- [How DVAP Differs](#how-dvap-differs)
+- [Key Features](#key-features)
+- [Demo](#demo)
+- [Screenshots](#screenshots)
+- [Labs](#labs)
+- [Architecture](#architecture)
+- [Security Architecture](#security-architecture)
+- [Services](#services)
+- [Environment Variables](#environment-variables)
+- [Upgrading](#upgrading)
+- [Development vs Production](#development-vs-production)
+- [Running Tests](#running-tests)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
 ## What is DVAP?
 
-DVAP is an open-source AI security research, training, benchmarking, and red teaming platform designed to help security professionals, AI engineers, researchers, students, and organizations understand how modern AI systems fail - and how to defend them.
+DVAP is an open-source AI security research, training, benchmarking, and red teaming platform designed to help security professionals, AI engineers, researchers, students, and organizations understand how modern AI systems fail and how to defend them.
 
 Built for the AI era, DVAP provides intentionally vulnerable AI applications, agents, RAG systems, MCP integrations, and domain-specific environments that can be attacked, analyzed, benchmarked, and secured.
 
@@ -40,7 +75,7 @@ Modern AI applications introduce entirely new attack surfaces:
 - Multi-Agent Attacks
 - Autonomous Agent Manipulation
 - Data Exfiltration
-- Identity & Trust Failures
+- Identity and Trust Failures
 - AI Supply Chain Risks
 
 Yet there is no single platform that allows researchers to safely learn, practice, benchmark, and validate these attacks in one place.
@@ -116,58 +151,6 @@ Run everything on your own machine. Your prompts, data, findings, and experiment
 
 ---
 
-## Quick Start
-
-```bash
-git clone https://github.com/sonuoffsec/DVAP
-cd DVAP
-cp .env.example .env
-docker compose up -d
-```
-
-Open `http://localhost:8080` once all containers are healthy. First run takes 30-60 seconds.
-
-## Development vs Production
-
-```bash
-# Development (default) - auto-loads docker-compose.override.yml
-# Hot reload for API and frontend, source mounted as volumes
-docker compose up -d
-
-# Production - baked images, no volume mounts, 4 uvicorn workers
-docker compose -f docker-compose.yml up -d
-```
-
-Build images before the production run:
-```bash
-docker build -t dvap-api:latest --target production ./backend
-docker build -t dvap-web:latest --target production ./frontend
-```
-
-## Running Tests
-
-Tests require a PostgreSQL instance. Start the stack first:
-
-```bash
-docker compose up -d postgres
-export TEST_DATABASE_URL=postgresql+asyncpg://dvap:<your-postgres-password>@localhost:5432/dvap_test
-cd backend
-pip install -e ".[dev]"
-pytest
-```
-
-## Services
-
-| Service | Port (internal) | Purpose |
-|---|---|---|
-| PostgreSQL | 5432 | Primary datastore |
-| Redis | 6379 | Rate limiting, instance TTL |
-| Qdrant | 6333 | Semantic search over findings |
-| Ollama | 11434 | Local LLM inference |
-| API | 8000 | FastAPI backend |
-| Web | 3000 | Next.js frontend |
-| Nginx | 8080 (host) | Reverse proxy |
-
 ## Labs
 
 15 containerized labs, each with flags, hints, walkthrough, and OWASP LLM Top 10 + MITRE ATLAS mapping.
@@ -183,7 +166,7 @@ pytest
 | Multi-Agent Security | Advanced | LLM08 | AML.T0054 |
 | Autonomous Agent Security | Advanced | LLM08, LLM09 | AML.T0054 |
 | Data Exfiltration | Advanced | LLM06 | AML.T0057, AML.T0058 |
-| Agent Identity & Trust Abuse | Advanced | LLM08 | AML.T0058 |
+| Agent Identity and Trust Abuse | Advanced | LLM08 | AML.T0058 |
 | AI Banking Platform | Intermediate | LLM01, LLM06 | AML.T0043 |
 | AI Healthcare Environment | Advanced | LLM01, LLM06 | AML.T0043 |
 | Multi-Tenant AI SaaS | Advanced | LLM06 | AML.T0043 |
@@ -191,6 +174,8 @@ pytest
 | AI Developer Platform | Expert | LLM03, LLM07 | AML.T0010, AML.T0068 |
 
 Each lab runs in an isolated Docker container with its own Ollama-backed LLM endpoint.
+
+---
 
 ## Architecture
 
@@ -231,6 +216,8 @@ graph TB
 
 Lab containers are isolated on a separate Docker network. They can reach Ollama for LLM inference but cannot reach the database, Redis, or Qdrant.
 
+---
+
 ## Security Architecture
 
 ### Network Isolation
@@ -262,6 +249,22 @@ Lab instances stop automatically after 1 hour via Redis TTL keys. Call `POST /ap
 
 Flag submissions are rate-limited to 15 attempts per 60-second window per session token.
 
+---
+
+## Services
+
+| Service | Port (internal) | Purpose |
+|---|---|---|
+| PostgreSQL | 5432 | Primary datastore |
+| Redis | 6379 | Rate limiting, instance TTL |
+| Qdrant | 6333 | Semantic search over findings |
+| Ollama | 11434 | Local LLM inference |
+| API | 8000 | FastAPI backend |
+| Web | 3000 | Next.js frontend |
+| Nginx | 8080 (host) | Reverse proxy |
+
+---
+
 ## Environment Variables
 
 See `.env.example` for all variables. Key ones to change before any networked deployment:
@@ -271,6 +274,8 @@ SECRET_KEY=          # strong random value for HMAC signing
 POSTGRES_PASSWORD=   # change from the default
 REDIS_PASSWORD=      # change from the default
 ```
+
+---
 
 ## Upgrading
 
@@ -304,7 +309,40 @@ docker compose up -d --build
 diff .env .env.example
 ```
 
-Add any missing variables before restarting.
+---
+
+## Development vs Production
+
+```bash
+# Development (default) - auto-loads docker-compose.override.yml
+# Hot reload for API and frontend, source mounted as volumes
+docker compose up -d
+
+# Production - baked images, no volume mounts, 4 uvicorn workers
+docker compose -f docker-compose.yml up -d
+```
+
+Build images before the production run:
+```bash
+docker build -t dvap-api:latest --target production ./backend
+docker build -t dvap-web:latest --target production ./frontend
+```
+
+---
+
+## Running Tests
+
+Tests require a PostgreSQL instance. Start the stack first:
+
+```bash
+docker compose up -d postgres
+export TEST_DATABASE_URL=postgresql+asyncpg://dvap:<your-postgres-password>@localhost:5432/dvap_test
+cd backend
+pip install -e ".[dev]"
+pytest
+```
+
+---
 
 ## Roadmap
 
@@ -334,9 +372,13 @@ Add any missing variables before restarting.
 
 Want to contribute to the roadmap? Open an issue or start a discussion.
 
+---
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add labs, run tests, and submit pull requests.
+
+---
 
 ## License
 
