@@ -49,6 +49,26 @@ DVAP aims to become the definitive open-source platform for AI security educatio
 
 ---
 
+## How DVAP Differs
+
+| | DVAP | DVWA | HackTheBox | Gandalf (Lakera) | Blog Posts / Papers |
+|---|---|---|---|---|---|
+| AI-specific vulnerabilities | Yes | No | Partial | Partial | Yes (theory only) |
+| Local, no cloud | Yes | Yes | No | No | N/A |
+| 15 dedicated AI labs | Yes | No | No | No | No |
+| LLM benchmark engine | Yes | No | No | No | No |
+| CTF with flags | Yes | Yes | Yes | No | No |
+| OWASP LLM Top 10 coverage | Full | No | Partial | Partial | Varies |
+| MITRE ATLAS mapping | Yes | No | No | No | Varies |
+| Report generation | Yes | No | No | No | No |
+| Research workspace | Yes | No | No | No | No |
+| Agent and MCP security | Yes | No | No | No | No |
+| Free and open source | Yes | Yes | Partial | No | Yes |
+
+DVAP is the only platform that combines hands-on AI attack labs, local LLM benchmarking, CTF challenges, and professional reporting in a single self-hosted environment.
+
+---
+
 ## Key Features
 
 **AI Security Labs**
@@ -150,16 +170,66 @@ pytest
 
 ## Labs
 
-15 containerized labs covering the OWASP LLM Top 10 and MITRE ATLAS:
+15 containerized labs, each with flags, hints, walkthrough, and OWASP LLM Top 10 + MITRE ATLAS mapping.
 
-| Category | Labs |
-|---|---|
-| Prompt & Memory Attacks | Prompt Injection, Memory Poisoning, RAG Poisoning, Tool Output Injection |
-| Agent Security | Multi-Agent, Browser Agent, MCP Security, Autonomous Agent |
-| Data & Identity | Data Exfiltration, Identity & Trust Abuse, Tool Injection |
-| Domain Scenarios | AI Banking, AI Healthcare, Multi-Tenant SaaS, Supply Chain, Developer Platform |
+| Lab | Difficulty | OWASP LLM | MITRE ATLAS |
+|---|---|---|---|
+| Prompt Injection | Beginner | LLM01 | AML.T0051, AML.T0054 |
+| Memory Poisoning | Intermediate | LLM02 | AML.T0054 |
+| RAG Poisoning | Intermediate | LLM02, LLM03 | AML.T0020, AML.T0043 |
+| Tool Output Injection | Intermediate | LLM07 | AML.T0054, AML.T0068 |
+| MCP Security | Advanced | LLM07 | AML.T0068 |
+| Browser Agent Security | Advanced | LLM07, LLM09 | AML.T0054 |
+| Multi-Agent Security | Advanced | LLM08 | AML.T0054 |
+| Autonomous Agent Security | Advanced | LLM08, LLM09 | AML.T0054 |
+| Data Exfiltration | Advanced | LLM06 | AML.T0057, AML.T0058 |
+| Agent Identity & Trust Abuse | Advanced | LLM08 | AML.T0058 |
+| AI Banking Platform | Intermediate | LLM01, LLM06 | AML.T0043 |
+| AI Healthcare Environment | Advanced | LLM01, LLM06 | AML.T0043 |
+| Multi-Tenant AI SaaS | Advanced | LLM06 | AML.T0043 |
+| AI Supply Chain Security | Expert | LLM03, LLM05 | AML.T0010, AML.T0048 |
+| AI Developer Platform | Expert | LLM03, LLM07 | AML.T0010, AML.T0068 |
 
-Each lab runs in an isolated Docker container with its own Ollama-backed LLM endpoint, flags, hints, and walkthrough.
+Each lab runs in an isolated Docker container with its own Ollama-backed LLM endpoint.
+
+## Architecture
+
+```mermaid
+graph TB
+    User([User Browser]) --> Nginx[Nginx :8080]
+    Nginx --> Web[Next.js Frontend :3000]
+    Nginx --> API[FastAPI Backend :8000]
+
+    API --> PG[(PostgreSQL)]
+    API --> Redis[(Redis)]
+    API --> Qdrant[(Qdrant)]
+    API --> Sock[Docker Socket]
+
+    Sock --> L1[Lab Container]
+    Sock --> L2[Lab Container]
+    Sock --> LN[Lab Container ...]
+
+    L1 --> Ollama[Ollama :11434]
+    L2 --> Ollama
+    LN --> Ollama
+
+    subgraph dvap-internal network
+        Web
+        API
+        PG
+        Redis
+        Qdrant
+    end
+
+    subgraph dvap-labs network
+        L1
+        L2
+        LN
+        Ollama
+    end
+```
+
+Lab containers are isolated on a separate Docker network. They can reach Ollama for LLM inference but cannot reach the database, Redis, or Qdrant.
 
 ## Security Architecture
 
@@ -235,6 +305,34 @@ diff .env .env.example
 ```
 
 Add any missing variables before restarting.
+
+## Roadmap
+
+### v1.1 - Expanded Lab Coverage
+- [ ] LangChain agent security lab
+- [ ] CrewAI multi-agent security lab
+- [ ] LlamaIndex RAG security lab
+- [ ] AutoGPT-style autonomous agent lab
+
+### v1.2 - Enhanced Benchmarking
+- [ ] Support for OpenAI and Anthropic API models
+- [ ] Custom benchmark suite builder
+- [ ] Benchmark comparison reports across model versions
+- [ ] Automated regression testing for model security
+
+### v1.3 - Platform Improvements
+- [ ] Multi-user support with session isolation
+- [ ] VS Code extension for research workspace
+- [ ] GitHub Actions integration for CI/CD security testing
+- [ ] Lab difficulty progression system
+
+### v2.0 - AI Red Team Automation
+- [ ] Automated attack chain generation
+- [ ] AI-assisted vulnerability discovery
+- [ ] Red team campaign templates
+- [ ] Integration with popular security tools (Burp Suite, Metasploit)
+
+Want to contribute to the roadmap? Open an issue or start a discussion.
 
 ## Contributing
 
