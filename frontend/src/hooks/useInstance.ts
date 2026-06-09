@@ -1,9 +1,7 @@
 "use client"
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import axios from "axios"
-
-const http = axios.create({ baseURL: "/api/v1" })
+import { http } from "@/lib/api"
 
 export interface LabInstance {
   id: string

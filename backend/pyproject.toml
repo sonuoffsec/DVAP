@@ -4,7 +4,7 @@ build-backend = "setuptools.backends.legacy:build"
 
 [project]
 name = "dvap-api"
-version = "1.0.0"
+version = "1.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[all]>=0.115.0",

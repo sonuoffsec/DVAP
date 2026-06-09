@@ -126,3 +126,32 @@ export interface LabStats {
   total_flags: number
   captured_flags: number
 }
+
+export interface CtfChallenge {
+  id: string
+  slug: string
+  name: string
+  difficulty: LabDifficulty
+  points: number
+  captured: boolean
+}
+
+export interface CtfLab {
+  slug: string
+  name: string
+  difficulty: LabDifficulty
+  category: LabCategory
+  challenges: CtfChallenge[]
+  captured_count: number
+  total_count: number
+  earned_points: number
+  total_points: number
+}
+
+export interface CtfScoreboard {
+  earned_points: number
+  total_points: number
+  captured_count: number
+  total_count: number
+  labs: CtfLab[]
+}

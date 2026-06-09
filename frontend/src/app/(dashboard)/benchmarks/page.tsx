@@ -7,19 +7,10 @@ import {
   Shield, Zap, Lock, ChevronRight, BarChart2, Clock,
   AlertTriangle, TrendingUp, TrendingDown, Award,
 } from "lucide-react"
-import axios from "axios"
 import { PageHeader } from "@/components/layout/PageHeader"
+import { http } from "@/lib/api"
+import { useModels } from "@/hooks/useModels"
 import { cn } from "@/lib/utils"
-
-const http = axios.create({ baseURL: "/api/v1" })
-
-/* ── Local models only ── */
-const MODELS = [
-  { id: "llama3.2:3b",  label: "Llama 3.2",    sub: "3B · Meta",        color: "#4ade80", abbr: "L3" },
-  { id: "qwen2.5:3b",   label: "Qwen 2.5",     sub: "3B · Alibaba",     color: "#22d3ee", abbr: "Q2" },
-  { id: "gemma2:2b",    label: "Gemma 2",       sub: "2B · Google",      color: "#a78bfa", abbr: "G2" },
-  { id: "mistral:7b",   label: "Mistral",       sub: "7B · Mistral AI",  color: "#fbbf24", abbr: "MI" },
-]
 
 /* ── Suite metadata ── */
 const SUITE_META: Record<string, { icon: typeof Shield; color: string; desc: string }> = {
@@ -74,6 +65,7 @@ function ScoreRing({ score }: { score: number }) {
 
 export default function BenchmarksPage() {
   const qc = useQueryClient()
+  const models = useModels()
   const [suite, setSuite] = useState("prompt-injection")
   const [model, setModel] = useState("llama3.2:3b")
   const [activeRun, setActiveRun] = useState<string | null>(null)
@@ -99,7 +91,7 @@ export default function BenchmarksPage() {
     onSuccess: (d) => { setActiveRun(d.id); qc.invalidateQueries({ queryKey: ["bruns"] }) },
   })
 
-  const selectedModel = MODELS.find(m => m.id === model)!
+  const selectedModel = models.find(m => m.id === model) ?? models[0]
   const selectedSuite = suites?.find((s: any) => s.key === suite)
   const suiteMeta = SUITE_META[suite]
   const SuiteIcon = suiteMeta?.icon ?? Shield
@@ -183,7 +175,7 @@ export default function BenchmarksPage() {
               <span className="ml-auto text-[10px] text-muted-foreground/40 mono">via Ollama</span>
             </div>
             <div className="p-3 grid grid-cols-2 gap-2">
-              {MODELS.map((m) => {
+              {models.map((m) => {
                 const active = model === m.id
                 return (
                   <button
@@ -369,7 +361,7 @@ export default function BenchmarksPage() {
                 <p className="mt-1 text-[12px] text-muted-foreground">Select a suite and model, then hit Run</p>
               </div>
               <div className="flex flex-wrap justify-center gap-2">
-                {MODELS.map((m) => (
+                {models.map((m) => (
                   <span key={m.id} className="rounded-full px-2.5 py-1 text-[10px] font-medium mono"
                     style={{ background: `${m.color}15`, color: m.color, border: `1px solid ${m.color}30` }}>
                     {m.id}
@@ -401,7 +393,7 @@ export default function BenchmarksPage() {
                   id: string; name: string; model: string; status: string
                   security_score: number | null; created_at: string; suite: string
                 }) => {
-                  const mod = MODELS.find(m => m.id === r.model)
+                  const mod = models.find(m => m.id === r.model)
                   const active = activeRun === r.id
                   return (
                     <button

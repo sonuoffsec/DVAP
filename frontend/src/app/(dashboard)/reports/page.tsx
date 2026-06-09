@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { FileText, Plus, Download, Trash2, Loader2, Shield, AlertTriangle } from "lucide-react"
-import axios from "axios"
+import { http } from "@/lib/api"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { TimeAgo } from "@/components/ui/time-ago"
 
-const http = axios.create({ baseURL: "/api/v1" })
 
 const RISK_STYLES: Record<string, string> = {
   critical: "bg-red-500/10 text-red-400 border-red-500/20",

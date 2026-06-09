@@ -3,14 +3,13 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Shield, AlertTriangle, Info, Zap, RefreshCw } from "lucide-react"
-import axios from "axios"
+import { http } from "@/lib/api"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { TimeAgo } from "@/components/ui/time-ago"
 
-const http = axios.create({ baseURL: "/api/v1" })
 
 interface SocEvent {
   id: string

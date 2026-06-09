@@ -58,6 +58,11 @@ async def get_stats(db: DbSession) -> dict:
     return await lab_service.get_lab_stats(db)
 
 
+@router.get("/ctf/scoreboard")
+async def ctf_scoreboard(db: DbSession) -> dict:
+    return await lab_service.get_ctf_scoreboard(db)
+
+
 @router.get("/{slug}", response_model=LabResponse)
 async def get_lab(db: DbSession, slug: str) -> LabResponse:
     lab = await lab_service.get_lab_by_slug(db, slug)

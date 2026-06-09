@@ -85,6 +85,65 @@ async def submit_flag(
     return is_correct, points
 
 
+async def get_ctf_scoreboard(db: AsyncSession) -> dict:
+    labs = await list_labs(db)
+
+    captured_stmt = (
+        select(distinct(FlagSubmission.challenge_id))
+        .where(FlagSubmission.is_correct.is_(True))
+    )
+    captured_result = await db.execute(captured_stmt)
+    captured_ids = {str(cid) for cid in captured_result.scalars().all()}
+
+    total_earned = 0
+    total_possible = 0
+    captured_count = 0
+    lab_data = []
+
+    for lab in labs:
+        lab_earned = 0
+        lab_possible = 0
+        challenges = []
+
+        for ch in lab.challenges:
+            is_captured = str(ch.id) in captured_ids
+            challenges.append({
+                "id": str(ch.id),
+                "slug": ch.slug,
+                "name": ch.name,
+                "difficulty": ch.difficulty,
+                "points": ch.points,
+                "captured": is_captured,
+            })
+            lab_possible += ch.points
+            if is_captured:
+                lab_earned += ch.points
+                captured_count += 1
+
+        total_earned += lab_earned
+        total_possible += lab_possible
+
+        lab_data.append({
+            "slug": lab.slug,
+            "name": lab.name,
+            "difficulty": lab.difficulty,
+            "category": lab.category,
+            "challenges": challenges,
+            "captured_count": sum(1 for c in challenges if c["captured"]),
+            "total_count": len(challenges),
+            "earned_points": lab_earned,
+            "total_points": lab_possible,
+        })
+
+    return {
+        "earned_points": total_earned,
+        "total_points": total_possible,
+        "captured_count": captured_count,
+        "total_count": sum(len(l["challenges"]) for l in lab_data),
+        "labs": lab_data,
+    }
+
+
 async def get_lab_stats(db: AsyncSession) -> dict:
     total = await db.scalar(select(func.count(Lab.id)))
     by_difficulty = await db.execute(

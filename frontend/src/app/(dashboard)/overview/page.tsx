@@ -2,7 +2,6 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { useMemo, type ComponentType, type CSSProperties } from "react"
-import axios from "axios"
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts"
@@ -12,14 +11,13 @@ import {
   Activity, Play, BookOpen, Target, ArrowUpRight,
   CheckCircle2, Circle, ChevronRight, Bug,
 } from "lucide-react"
+import { http } from "@/lib/api"
 import { useLabStats } from "@/hooks/useLabs"
 import { useFindings } from "@/hooks/useFindings"
 import { useOllama } from "@/hooks/useHealth"
 import { cn } from "@/lib/utils"
 import { TimeAgo } from "@/components/ui/time-ago"
 import { ClientOnly } from "@/components/ui/client-only"
-
-const http = axios.create({ baseURL: "/api/v1" })
 
 /* ── Model palette ── */
 const MODEL_COLORS: Record<string, { color: string; abbr: string }> = {

@@ -2,20 +2,18 @@
 
 import { useRef, useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
-import axios from "axios"
 import {
   Bell, Search, Settings, ChevronDown, Menu,
   AlertTriangle, CheckCircle2, FlaskConical, Flag,
   BarChart2, Activity, X,
 } from "lucide-react"
+import { http } from "@/lib/api"
 import { useHealth } from "@/hooks/useHealth"
 import { useAppStore } from "@/store"
 import { CommandPalette } from "@/components/CommandPalette"
 import { TimeAgo } from "@/components/ui/time-ago"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
-
-const http = axios.create({ baseURL: "/api/v1" })
 
 type ServiceEntry = {
   key: string

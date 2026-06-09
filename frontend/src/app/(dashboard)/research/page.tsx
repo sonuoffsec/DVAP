@@ -6,22 +6,13 @@ import {
   Plus, Send, Loader2, Microscope, Zap, ChevronRight,
   Cpu, MessageSquare, Clock,
 } from "lucide-react"
-import axios from "axios"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { http } from "@/lib/api"
+import { useModels } from "@/hooks/useModels"
 import { cn } from "@/lib/utils"
 import { TimeAgo } from "@/components/ui/time-ago"
-
-const http = axios.create({ baseURL: "/api/v1" })
-
-/* ── Local Ollama models only ── */
-const MODELS = [
-  { id: "llama3.2:3b",  label: "Llama 3.2",  sub: "3B · Meta",       color: "#4ade80", abbr: "L3" },
-  { id: "qwen2.5:3b",   label: "Qwen 2.5",   sub: "3B · Alibaba",    color: "#22d3ee", abbr: "Q2" },
-  { id: "gemma2:2b",    label: "Gemma 2",     sub: "2B · Google",     color: "#a78bfa", abbr: "G2" },
-  { id: "mistral:7b",   label: "Mistral",     sub: "7B · Mistral AI", color: "#fbbf24", abbr: "MI" },
-]
 
 interface Session {
   id: string
@@ -43,6 +34,7 @@ interface Trace {
 
 export default function ResearchPage() {
   const qc = useQueryClient()
+  const models = useModels()
   const [activeSession, setActiveSession] = useState<string | null>(null)
   const [message, setMessage] = useState("")
   const [systemPrompt, setSystemPrompt] = useState("You are a helpful AI assistant.")
@@ -94,7 +86,7 @@ export default function ResearchPage() {
 
   const traces: Trace[] = sessionDetail?.traces ?? []
   const chatTraces = traces.filter(t => ["user_prompt", "llm_response"].includes(t.event_type))
-  const selectedModel = MODELS.find(m => m.id === model)!
+  const selectedModel = models.find(m => m.id === model) ?? models[0]
 
   return (
     <div className="flex h-full gap-4 overflow-hidden">
@@ -145,7 +137,7 @@ export default function ResearchPage() {
 
             {showModelPicker && (
               <div className="mt-1.5 space-y-1">
-                {MODELS.map(m => (
+                {models.map(m => (
                   <button
                     key={m.id}
                     onClick={() => { setModel(m.id); setShowModelPicker(false) }}
@@ -187,7 +179,7 @@ export default function ResearchPage() {
             <p className="px-2 py-4 text-center text-xs text-muted-foreground/50">No sessions yet</p>
           )}
           {sessions?.map(s => {
-            const mod = MODELS.find(m => m.id === s.model)
+            const mod = models.find(m => m.id === s.model)
             return (
               <button
                 key={s.id}
@@ -234,7 +226,7 @@ export default function ResearchPage() {
               <p className="mt-1 text-[13px] text-muted-foreground">Create a session to start probing AI models</p>
             </div>
             <div className="flex flex-wrap justify-center gap-2">
-              {MODELS.map(m => (
+              {models.map(m => (
                 <span key={m.id}
                   className="rounded-full px-2.5 py-1 text-[11px] font-medium mono"
                   style={{ background: `${m.color}15`, color: m.color, border: `1px solid ${m.color}30` }}>

@@ -6,14 +6,13 @@ import {
   Plus, ChevronRight, CheckCircle2, XCircle, Clock,
   Loader2, Crosshair, Flag, Trash2,
 } from "lucide-react"
-import axios from "axios"
+import { http } from "@/lib/api"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
-const http = axios.create({ baseURL: "/api/v1" })
 
 const STAGE_COLORS: Record<string, string> = {
   initial_access: "border-red-500/40 bg-red-500/5 text-red-400",

@@ -1,7 +1,7 @@
 import axios from "axios"
-import type { HealthResponse, LabDetail, LabStats, LabSummary, OllamaStatus, Finding, FindingSeverity } from "@/types"
+import type { HealthResponse, LabDetail, LabStats, LabSummary, OllamaStatus, Finding, FindingSeverity, CtfScoreboard } from "@/types"
 
-const http = axios.create({
+export const http = axios.create({
   baseURL: "/api/v1",
   headers: { "Content-Type": "application/json" },
 })
@@ -59,4 +59,9 @@ export const settingsApi = {
 export const healthApi = {
   check: () =>
     http.get<HealthResponse>("/health").then((r) => r.data),
+}
+
+export const ctfApi = {
+  scoreboard: () =>
+    http.get<CtfScoreboard>("/labs/ctf/scoreboard").then((r) => r.data),
 }
