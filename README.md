@@ -148,24 +148,88 @@ Run everything on your own machine. Your prompts, data, findings, and experiment
 
 ---
 
-## Demo
+## 🎬 Demo
 
-[![Watch the demo](https://img.youtube.com/vi/-hzp43YpKIQ/maxresdefault.jpg)](https://youtu.be/-hzp43YpKIQ)
+<div align="center">
+
+[![DVAP Demo — Train. Break. Defend. AI Systems.](https://img.youtube.com/vi/-hzp43YpKIQ/maxresdefault.jpg)](https://youtu.be/-hzp43YpKIQ)
+
+<sub><b>▶ Train. Break. Defend. AI Systems.</b> &nbsp;·&nbsp; Click to watch the full attack walkthrough</sub>
+
+</div>
 
 ---
 
-## Screenshots
+## 📸 Screenshots
 
-<img src="docs/screenshot-dashboard.png" width="100%"/>
+<br/>
+
+### 🖥️ Research Command Center
+
+<div align="center">
+<img src="docs/screenshot-dashboard.png" width="100%" alt="DVAP Research Command Center"/>
 <br/><br/>
+<sub><b>Research Command Center</b> &nbsp;·&nbsp; Live platform activity, model benchmark leaderboard, flag capture progress, and service health in a single operational view.</sub>
+</div>
 
-<img src="docs/screenshot-labs.png" width="49%"/> <img src="docs/screenshot-ctf.png" width="49%"/>
+<br/>
+
+---
+
+### 🧩 Platform Modules
+
+<br/>
+
+<table>
+<tr>
+<td align="center" width="50%" valign="top">
+<img src="docs/screenshot-labs.png" width="100%" alt="AI Security Labs"/>
 <br/><br/>
-
-<img src="docs/screenshot-benchmarks.png" width="49%"/> <img src="docs/screenshot-research.png" width="49%"/>
+<b>⚗️ AI Security Labs</b>
+<br/>
+<sub>15 containerized vulnerable AI environments across every major attack class</sub>
+<br/>&nbsp;
+</td>
+<td align="center" width="50%" valign="top">
+<img src="docs/screenshot-ctf.png" width="100%" alt="CTF Challenges"/>
 <br/><br/>
+<b>🚩 CTF Challenges</b>
+<br/>
+<sub>Flags, hints, and walkthroughs mapped to OWASP LLM Top 10 and MITRE ATLAS</sub>
+<br/>&nbsp;
+</td>
+</tr>
+<tr>
+<td align="center" width="50%" valign="top">
+<img src="docs/screenshot-benchmarks.png" width="100%" alt="Benchmark Center"/>
+<br/><br/>
+<b>📊 Benchmark Center</b>
+<br/>
+<sub>Evaluate local LLMs against prompt injection, jailbreak, and data exfiltration suites</sub>
+<br/>&nbsp;
+</td>
+<td align="center" width="50%" valign="top">
+<img src="docs/screenshot-research.png" width="100%" alt="Research Workspace"/>
+<br/><br/>
+<b>🔬 Research Workspace</b>
+<br/>
+<sub>Full trace recording of prompts, memory, tool calls, and agent behavior</sub>
+<br/>&nbsp;
+</td>
+</tr>
+</table>
 
-<img src="docs/screenshot-findings.png" width="100%"/>
+<br/>
+
+---
+
+### 🛡️ Findings Dashboard
+
+<div align="center">
+<img src="docs/screenshot-findings.png" width="100%" alt="DVAP Findings Dashboard"/>
+<br/><br/>
+<sub><b>Findings Dashboard</b> &nbsp;·&nbsp; Track, triage, and document security findings with severity ratings, OWASP LLM Top 10 mapping, MITRE ATLAS techniques, and export-ready reports.</sub>
+</div>
 
 ---
 
