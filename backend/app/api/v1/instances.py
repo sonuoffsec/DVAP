@@ -21,6 +21,19 @@ def _build_response(instance, host: str = "localhost") -> InstanceResponse:
     return resp.model_copy(update={"access_url": access_url})
 
 
+@router.get("/running")
+async def running_instances(db: DbSession) -> list[dict]:
+    from sqlalchemy import select
+    from app.models.lab import InstanceStatus, Lab, LabInstance
+    stmt = (
+        select(Lab.slug, LabInstance.session_token)
+        .join(Lab, Lab.id == LabInstance.lab_id)
+        .where(LabInstance.status == InstanceStatus.RUNNING)
+    )
+    result = await db.execute(stmt)
+    return [{"slug": row.slug, "session_token": row.session_token} for row in result.all()]
+
+
 @router.post("/{slug}/launch", response_model=InstanceResponse, status_code=status.HTTP_201_CREATED)
 async def launch_lab(db: DbSession, redis: RedisClient, slug: str, body: LaunchRequest) -> InstanceResponse:
     lab = await lab_service.get_lab_by_slug(db, slug)

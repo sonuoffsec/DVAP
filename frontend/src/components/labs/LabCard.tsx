@@ -3,7 +3,7 @@ import {
   Target, Flag, Play, Clock,
   Terminal, Brain, Database, Wrench, Plug, Globe, Network,
   Landmark, Package, Bot, ArrowUpFromLine, ShieldAlert, Users,
-  Stethoscope, Code2, type LucideIcon,
+  Stethoscope, Code2, type LucideIcon, Zap,
 } from "lucide-react"
 import { DifficultyBadge } from "./DifficultyBadge"
 import { truncate, cn } from "@/lib/utils"
@@ -43,15 +43,21 @@ const TIME_ESTIMATE: Record<string, string> = {
 
 interface LabCardProps {
   lab: LabSummary
+  isRunning?: boolean
 }
 
-export function LabCard({ lab }: LabCardProps) {
+export function LabCard({ lab, isRunning = false }: LabCardProps) {
   const categoryConfig = CATEGORY_CONFIG[lab.category]
   const Icon = ICON_MAP[categoryConfig?.icon ?? "Terminal"] ?? Terminal
   const iconColor = CATEGORY_COLORS[lab.category] ?? "bg-white/10 text-white/60"
 
   return (
-    <div className="group relative flex flex-col rounded-xl border border-border bg-card transition-all duration-200 hover:-translate-y-px hover:border-white/[0.12] hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+    <div className={cn(
+      "group relative flex flex-col rounded-xl border bg-card transition-all duration-200 hover:-translate-y-px hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)]",
+      isRunning
+        ? "border-emerald-500/30 shadow-[0_0_0_1px_hsl(142_71%_45%/0.15)]  hover:border-emerald-500/50"
+        : "border-border hover:border-white/[0.12]"
+    )}>
 
       {/* Header */}
       <div className="p-4 pb-3">
@@ -64,7 +70,18 @@ export function LabCard({ lab }: LabCardProps) {
               <h3 className="text-[13px] font-semibold leading-snug text-foreground group-hover:text-primary transition-colors truncate">
                 {lab.name}
               </h3>
-              <DifficultyBadge difficulty={lab.difficulty} />
+              <div className="flex items-center gap-1.5 shrink-0">
+                {isRunning && (
+                  <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 ring-1 ring-emerald-500/20">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    </span>
+                    Running
+                  </span>
+                )}
+                <DifficultyBadge difficulty={lab.difficulty} />
+              </div>
             </div>
             <p className="mt-0.5 text-[11px] text-muted-foreground/50">
               {categoryConfig?.label ?? lab.category}
@@ -114,10 +131,15 @@ export function LabCard({ lab }: LabCardProps) {
         </div>
         <Link
           href={`/labs/${lab.slug}`}
-          className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary transition-all hover:bg-primary/20 hover:shadow-[0_0_12px_hsl(var(--primary)/0.2)]"
+          className={cn(
+            "flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-medium transition-all",
+            isRunning
+              ? "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20 hover:bg-emerald-500/20"
+              : "bg-primary/10 text-primary hover:bg-primary/20 hover:shadow-[0_0_12px_hsl(var(--primary)/0.2)]"
+          )}
         >
-          <Play className="h-2.5 w-2.5" />
-          Launch
+          {isRunning ? <Zap className="h-2.5 w-2.5" /> : <Play className="h-2.5 w-2.5" />}
+          {isRunning ? "Open" : "Launch"}
         </Link>
       </div>
     </div>

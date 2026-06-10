@@ -1,10 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { Search, SlidersHorizontal, X } from "lucide-react"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { LabCard } from "@/components/labs/LabCard"
 import { Input } from "@/components/ui/input"
+import { http } from "@/lib/api"
 import { useLabs } from "@/hooks/useLabs"
 import { CATEGORY_CONFIG, DIFFICULTY_CONFIG } from "@/lib/constants"
 import type { LabCategory, LabDifficulty } from "@/types"
@@ -18,6 +20,16 @@ export default function LabsPage() {
   const [activeDifficulty, setActiveDifficulty] = useState<LabDifficulty | null>(null)
   const [activeCategory, setActiveCategory] = useState<LabCategory | null>(null)
   const [showCategories, setShowCategories] = useState(false)
+
+  const { data: runningLabs } = useQuery({
+    queryKey: ["running-labs"],
+    queryFn: () => http.get<{ slug: string }[]>("/labs/running").then(r => r.data),
+    refetchInterval: 10_000,
+  })
+  const runningSet = useMemo(
+    () => new Set(runningLabs?.map(l => l.slug) ?? []),
+    [runningLabs]
+  )
 
   const { data: labs, isLoading } = useLabs({
     difficulty: activeDifficulty ?? undefined,
@@ -139,7 +151,7 @@ export default function LabsPage() {
       ) : filtered && filtered.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((lab) => (
-            <LabCard key={lab.id} lab={lab} />
+            <LabCard key={lab.id} lab={lab} isRunning={runningSet.has(lab.slug)} />
           ))}
         </div>
       ) : (

@@ -137,7 +137,19 @@ export default function ReportsPage() {
       </aside>
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        {!detail ? (
+        {generate.isPending ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-violet-500/10 ring-1 ring-violet-500/20">
+              <Loader2 className="h-7 w-7 animate-spin text-violet-400" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-foreground">Generating report...</p>
+              <p className="mt-1 text-xs text-muted-foreground/55">
+                Analyzing findings and mapping to OWASP LLM Top 10 and MITRE ATLAS
+              </p>
+            </div>
+          </div>
+        ) : !detail ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3">
             <FileText className="h-12 w-12 text-muted-foreground/20" />
             <p className="text-sm text-muted-foreground">Generate or select a report</p>

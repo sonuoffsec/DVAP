@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef } from "react"
 import { ExternalLink, RefreshCw, Square, Terminal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { LabInstance } from "@/hooks/useInstance"
@@ -17,6 +18,13 @@ export function InstancePanel({ slug, instance, onStopped, onReset }: InstancePa
   const stop  = useStopInstance(slug)
   const reset = useResetInstance(slug)
   const { data: logsData } = useInstanceLogs(slug, instance.session_token)
+  const logsRef = useRef<HTMLPreElement>(null)
+
+  useEffect(() => {
+    if (logsRef.current) {
+      logsRef.current.scrollTop = logsRef.current.scrollHeight
+    }
+  }, [logsData?.logs])
 
   const handleStop = async () => {
     await stop.mutateAsync(instance.session_token)
@@ -77,11 +85,23 @@ export function InstancePanel({ slug, instance, onStopped, onReset }: InstancePa
       {/* Logs */}
       {logsData?.logs && (
         <div className="surface rounded-xl overflow-hidden">
-          <div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
-            <Terminal className="h-3.5 w-3.5 text-muted-foreground/60" />
-            <span className="text-[12px] font-semibold text-foreground">Container Logs</span>
+          <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+            <div className="flex items-center gap-2">
+              <Terminal className="h-3.5 w-3.5 text-muted-foreground/60" />
+              <span className="text-[12px] font-semibold text-foreground">Container Logs</span>
+            </div>
+            <span className="flex items-center gap-1.5 text-[10px] text-emerald-400/70">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              </span>
+              Live
+            </span>
           </div>
-          <pre className="mono max-h-48 overflow-auto p-3 text-[11px] leading-relaxed text-zinc-300">
+          <pre
+            ref={logsRef}
+            className="mono max-h-48 overflow-auto p-3 text-[11px] leading-relaxed text-zinc-300"
+          >
             {logsData.logs || "No logs yet..."}
           </pre>
         </div>
