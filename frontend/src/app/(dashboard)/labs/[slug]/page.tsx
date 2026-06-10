@@ -4,7 +4,7 @@ import { use, useState } from "react"
 import Link from "next/link"
 import {
   ArrowLeft, Target, Flag, Shield, Network,
-  Wrench, Lightbulb, Play, Loader2,
+  Wrench, Lightbulb, Play, Loader2, BookOpen, ChevronDown, ChevronRight,
 } from "lucide-react"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { DifficultyBadge } from "@/components/labs/DifficultyBadge"
@@ -16,6 +16,101 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { useLab } from "@/hooks/useLabs"
 import { useLaunchLab, useInstance } from "@/hooks/useInstance"
+import type { Challenge } from "@/types"
+import { cn } from "@/lib/utils"
+
+interface ChallengeCardProps {
+  challenge: Challenge
+  isRunning: boolean
+  slug: string
+  sessionToken: string | null
+}
+
+function ChallengeCard({ challenge, isRunning, slug, sessionToken }: ChallengeCardProps) {
+  const [walkthroughOpen, setWalkthroughOpen] = useState(false)
+
+  const walkthroughParagraphs = challenge.walkthrough
+    ? challenge.walkthrough.split("\n\n").filter(Boolean)
+    : []
+
+  return (
+    <Card>
+      <CardContent className="pt-4">
+        <div className="space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-1 flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Flag className="h-3.5 w-3.5 text-primary shrink-0" />
+                <span className="text-sm font-medium text-foreground">{challenge.name}</span>
+                <DifficultyBadge difficulty={challenge.difficulty} />
+              </div>
+              <p className="text-sm text-muted-foreground">{challenge.description}</p>
+              {challenge.hints.length > 0 && (
+                <div className="mt-2 space-y-1.5">
+                  {challenge.hints.map((hint, i) => (
+                    <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <Lightbulb className="mt-0.5 h-3 w-3 shrink-0 text-amber-400/70" />
+                      {hint}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="shrink-0 text-right">
+              <span className="text-sm font-semibold text-primary">{challenge.points}</span>
+              <p className="text-xs text-muted-foreground">pts</p>
+            </div>
+          </div>
+
+          {isRunning && sessionToken && (
+            <FlagSubmitForm labSlug={slug} challenge={challenge} sessionToken={sessionToken} />
+          )}
+
+          {walkthroughParagraphs.length > 0 && (
+            <div className="border-t border-border/50 pt-3">
+              <button
+                onClick={() => setWalkthroughOpen(v => !v)}
+                className="flex items-center gap-2 text-[12px] font-medium text-violet-400 hover:text-violet-300 transition-colors"
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                {walkthroughOpen ? "Hide Walkthrough" : "Show Walkthrough"}
+                {walkthroughOpen
+                  ? <ChevronDown className="h-3 w-3" />
+                  : <ChevronRight className="h-3 w-3" />
+                }
+              </button>
+
+              {walkthroughOpen && (
+                <div className="mt-3 rounded-lg border border-violet-500/15 bg-violet-500/5 p-4 space-y-3">
+                  <div className="flex items-center gap-2 pb-2 border-b border-violet-500/15">
+                    <BookOpen className="h-3.5 w-3.5 text-violet-400" />
+                    <span className="text-[12px] font-semibold text-violet-300">Walkthrough</span>
+                    <span className="ml-auto text-[10px] text-violet-400/50 italic">
+                      Try to solve it first
+                    </span>
+                  </div>
+                  {walkthroughParagraphs.map((para, i) => (
+                    <p
+                      key={i}
+                      className={cn(
+                        "text-[12px] leading-relaxed whitespace-pre-wrap",
+                        para.startsWith("Step ") || para.startsWith("What this demonstrates")
+                          ? "text-foreground/80 font-medium"
+                          : "text-muted-foreground"
+                      )}
+                    >
+                      {para}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -223,51 +318,13 @@ export default function LabDetailPage({ params }: PageProps) {
           )}
 
           {lab.challenges.map((challenge) => (
-            <Card key={challenge.id}>
-              <CardContent className="pt-4">
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Flag className="h-3.5 w-3.5 text-primary" />
-                        <span className="text-sm font-medium text-foreground">
-                          {challenge.name}
-                        </span>
-                        <DifficultyBadge difficulty={challenge.difficulty} />
-                      </div>
-                      <p className="text-sm text-muted-foreground">{challenge.description}</p>
-                      {challenge.hints.length > 0 && (
-                        <div className="mt-2 space-y-1.5">
-                          {challenge.hints.map((hint, i) => (
-                            <div
-                              key={i}
-                              className="flex items-start gap-2 text-xs text-muted-foreground"
-                            >
-                              <Lightbulb className="mt-0.5 h-3 w-3 shrink-0 text-amber-400/70" />
-                              {hint}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <span className="text-sm font-semibold text-primary">
-                        {challenge.points}
-                      </span>
-                      <p className="text-xs text-muted-foreground">pts</p>
-                    </div>
-                  </div>
-
-                  {isRunning && sessionToken && (
-                    <FlagSubmitForm
-                      labSlug={slug}
-                      challenge={challenge}
-                      sessionToken={sessionToken}
-                    />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <ChallengeCard
+              key={challenge.id}
+              challenge={challenge}
+              isRunning={isRunning}
+              slug={slug}
+              sessionToken={sessionToken}
+            />
           ))}
         </TabsContent>
 

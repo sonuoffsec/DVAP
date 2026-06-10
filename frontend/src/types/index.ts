@@ -29,6 +29,7 @@ export interface Challenge {
   difficulty: LabDifficulty
   points: number
   hints: string[]
+  walkthrough: string | null
   sort_order: number
 }
 
