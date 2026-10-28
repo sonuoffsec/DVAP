@@ -55,17 +55,20 @@ _HTML_TEMPLATE = """\
 </html>
 """
 
+# OWASP Top 10 for LLM Applications, 2026 edition (published 2026-08-03).
+# Supersedes the 2025 list; eight of ten entries changed rank and System Prompt
+# Leakage was renamed and broadened to Hidden Context Exposure.
 OWASP_LLM_TOP10 = [
     {"id": "LLM01", "name": "Prompt Injection", "categories": ["prompt_injection", "tool_injection"]},
-    {"id": "LLM02", "name": "Insecure Output Handling", "categories": ["data_exfiltration", "browser_agent"]},
-    {"id": "LLM03", "name": "Training Data Poisoning", "categories": ["rag_poisoning", "supply_chain"]},
-    {"id": "LLM04", "name": "Model Denial of Service", "categories": []},
-    {"id": "LLM05", "name": "Supply-Chain Vulnerabilities", "categories": ["supply_chain"]},
-    {"id": "LLM06", "name": "Sensitive Information Disclosure", "categories": ["data_exfiltration", "healthcare", "banking"]},
-    {"id": "LLM07", "name": "Insecure Plugin Design", "categories": ["mcp_security", "tool_injection"]},
-    {"id": "LLM08", "name": "Excessive Agency", "categories": ["autonomous_agent", "multi_agent", "browser_agent"]},
-    {"id": "LLM09", "name": "Overreliance", "categories": []},
-    {"id": "LLM10", "name": "Model Theft", "categories": ["supply_chain"]},
+    {"id": "LLM02", "name": "Sensitive Information Disclosure", "categories": ["data_exfiltration", "healthcare", "banking", "multi_tenant"]},
+    {"id": "LLM03", "name": "Excessive Agency", "categories": ["autonomous_agent", "multi_agent", "browser_agent", "mcp_security", "tool_injection", "identity_trust"]},
+    {"id": "LLM04", "name": "Supply Chain", "categories": ["supply_chain", "developer_platform"]},
+    {"id": "LLM05", "name": "Data and Model Poisoning", "categories": ["rag_poisoning", "memory_poisoning", "supply_chain"]},
+    {"id": "LLM06", "name": "Unbounded Consumption", "categories": []},
+    {"id": "LLM07", "name": "Misinformation", "categories": []},
+    {"id": "LLM08", "name": "Hidden Context Exposure", "categories": []},
+    {"id": "LLM09", "name": "Vector and Embedding Weaknesses", "categories": ["rag_poisoning"]},
+    {"id": "LLM10", "name": "Improper Output Handling", "categories": ["data_exfiltration", "browser_agent"]},
 ]
 
 MITRE_ATLAS_TECHNIQUES = [

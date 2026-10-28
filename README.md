@@ -240,20 +240,20 @@ Run everything on your own machine. Your prompts, data, findings, and experiment
 | Lab | Difficulty | OWASP LLM | MITRE ATLAS |
 |---|---|---|---|
 | Prompt Injection | Beginner | LLM01 | AML.T0051, AML.T0054 |
-| Memory Poisoning | Intermediate | LLM02 | AML.T0054 |
-| RAG Poisoning | Intermediate | LLM02, LLM03 | AML.T0020, AML.T0043 |
-| Tool Output Injection | Intermediate | LLM07 | AML.T0054, AML.T0068 |
-| MCP Security | Advanced | LLM07 | AML.T0068 |
-| Browser Agent Security | Advanced | LLM07, LLM09 | AML.T0054 |
-| Multi-Agent Security | Advanced | LLM08 | AML.T0054 |
-| Autonomous Agent Security | Advanced | LLM08, LLM09 | AML.T0054 |
-| Data Exfiltration | Advanced | LLM06 | AML.T0057, AML.T0058 |
-| Agent Identity and Trust Abuse | Advanced | LLM08 | AML.T0058 |
-| AI Banking Platform | Intermediate | LLM01, LLM06 | AML.T0043 |
-| AI Healthcare Environment | Advanced | LLM01, LLM06 | AML.T0043 |
-| Multi-Tenant AI SaaS | Advanced | LLM06 | AML.T0043 |
-| AI Supply Chain Security | Expert | LLM03, LLM05 | AML.T0010, AML.T0048 |
-| AI Developer Platform | Expert | LLM03, LLM07 | AML.T0010, AML.T0068 |
+| Memory Poisoning | Intermediate | LLM05, LLM03 | AML.T0054 |
+| RAG Poisoning | Intermediate | LLM09, LLM05 | AML.T0020, AML.T0043 |
+| Tool Output Injection | Intermediate | LLM01, LLM03 | AML.T0054, AML.T0068 |
+| MCP Security | Advanced | LLM01, LLM03 | AML.T0068 |
+| Browser Agent Security | Advanced | LLM03, LLM10 | AML.T0054 |
+| Multi-Agent Security | Advanced | LLM03 | AML.T0054 |
+| Autonomous Agent Security | Advanced | LLM03 | AML.T0054 |
+| Data Exfiltration | Advanced | LLM02, LLM10 | AML.T0057, AML.T0058 |
+| Agent Identity and Trust Abuse | Advanced | LLM03, LLM02 | AML.T0058 |
+| AI Banking Platform | Intermediate | LLM01, LLM02 | AML.T0043 |
+| AI Healthcare Environment | Advanced | LLM01, LLM02 | AML.T0043 |
+| Multi-Tenant AI SaaS | Advanced | LLM02 | AML.T0043 |
+| AI Supply Chain Security | Expert | LLM04, LLM05 | AML.T0010, AML.T0048 |
+| AI Developer Platform | Expert | LLM01, LLM04 | AML.T0010, AML.T0068 |
 
 Each lab runs in an isolated Docker container with its own Ollama-backed LLM endpoint.
 
@@ -261,22 +261,25 @@ Each lab runs in an isolated Docker container with its own Ollama-backed LLM end
 
 ## OWASP LLM Top 10 Coverage
 
-DVAP is aligned with the [OWASP Top 10 for Large Language Model Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/). Each category maps to one or more dedicated labs.
+DVAP is aligned with the [OWASP Top 10 for LLM Applications, 2026 edition](https://genai.owasp.org/llm-top-10/) (published 2026-08-03). Each category maps to one or more dedicated labs.
 
 | Category | Name | Labs | Status |
 |---|---|---|---|
-| LLM01 | Prompt Injection | Prompt Injection, AI Banking Platform, AI Healthcare Environment | Covered |
-| LLM02 | Data and Memory Poisoning | Memory Poisoning, RAG Poisoning | Covered |
-| LLM03 | Supply Chain and Training Data Risks | RAG Poisoning, AI Supply Chain Security, AI Developer Platform | Covered |
-| LLM04 | Model Denial of Service | | Planned (v1.2) |
-| LLM05 | Insecure Supply Chain | AI Supply Chain Security | Covered |
-| LLM06 | Sensitive Information Disclosure | Data Exfiltration, AI Banking Platform, AI Healthcare Environment, Multi-Tenant AI SaaS | Covered |
-| LLM07 | Insecure Plugin Design | Tool Output Injection, MCP Security, Browser Agent Security, AI Developer Platform | Covered |
-| LLM08 | Excessive Agency | Multi-Agent Security, Autonomous Agent Security, Agent Identity and Trust Abuse | Covered |
-| LLM09 | Overreliance | Browser Agent Security, Autonomous Agent Security | Covered |
-| LLM10 | Model Theft | | Planned (v1.2) |
+| LLM01 | Prompt Injection | Prompt Injection, Tool Output Injection, MCP Security, AI Banking Platform, AI Healthcare Environment, AI Developer Platform | Covered |
+| LLM02 | Sensitive Information Disclosure | Data Exfiltration, AI Banking Platform, AI Healthcare Environment, Multi-Tenant AI SaaS, Agent Identity and Trust Abuse | Covered |
+| LLM03 | Excessive Agency | Multi-Agent Security, Autonomous Agent Security, Agent Identity and Trust Abuse, Browser Agent Security, MCP Security, Tool Output Injection | Covered |
+| LLM04 | Supply Chain | AI Supply Chain Security, AI Developer Platform | Covered |
+| LLM05 | Data and Model Poisoning | RAG Poisoning, Memory Poisoning, AI Supply Chain Security | Covered |
+| LLM06 | Unbounded Consumption | | Planned |
+| LLM07 | Misinformation | | Planned |
+| LLM08 | Hidden Context Exposure | | Planned |
+| LLM09 | Vector and Embedding Weaknesses | RAG Poisoning | Covered |
+| LLM10 | Improper Output Handling | Data Exfiltration, Browser Agent Security | Covered |
 
-8 of 10 categories covered across 15 labs. LLM04 and LLM10 are on the v1.2 roadmap.
+7 of 10 categories covered across 15 labs. LLM06 (Unbounded Consumption), LLM07
+(Misinformation) and LLM08 (Hidden Context Exposure) have no dedicated lab yet.
+Note that Model Theft, covered by the roadmap's v1.2 entry against the old list,
+is no longer an OWASP category in the 2026 edition.
 
 ---
 

@@ -10,21 +10,21 @@ import { useLabs } from "@/hooks/useLabs"
 import { cn } from "@/lib/utils"
 
 const OWASP_MAP: Record<string, string[]> = {
-  prompt_injection: ["LLM01", "LLM02"],
-  memory_poisoning: ["LLM08", "LLM06"],
-  rag_poisoning: ["LLM01", "LLM03"],
-  tool_injection: ["LLM07", "LLM08"],
-  mcp_security: ["LLM07", "LLM01"],
-  browser_agent: ["LLM08", "LLM02"],
-  multi_agent: ["LLM08"],
-  banking: ["LLM01", "LLM06", "LLM08"],
-  supply_chain: ["LLM05", "LLM03"],
-  autonomous_agent: ["LLM08", "LLM04"],
-  data_exfiltration: ["LLM02", "LLM06"],
-  identity_trust: ["LLM08", "LLM06"],
-  multi_tenant: ["LLM06"],
-  healthcare: ["LLM01", "LLM06"],
-  developer_platform: ["LLM01", "LLM02"],
+  prompt_injection: ["LLM01", "LLM10"],
+  memory_poisoning: ["LLM05", "LLM03"],
+  rag_poisoning: ["LLM01", "LLM05", "LLM09"],
+  tool_injection: ["LLM01", "LLM03"],
+  mcp_security: ["LLM01", "LLM03"],
+  browser_agent: ["LLM03", "LLM10"],
+  multi_agent: ["LLM03"],
+  banking: ["LLM01", "LLM02", "LLM03"],
+  supply_chain: ["LLM04", "LLM05"],
+  autonomous_agent: ["LLM03"],
+  data_exfiltration: ["LLM02", "LLM10"],
+  identity_trust: ["LLM02", "LLM03"],
+  multi_tenant: ["LLM02"],
+  healthcare: ["LLM01", "LLM02"],
+  developer_platform: ["LLM01", "LLM04"],
 }
 
 export default function ThreatModelsPage() {
